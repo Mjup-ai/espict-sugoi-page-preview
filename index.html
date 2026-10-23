@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#00bffb">
+  <title>エスピクトスクール | 学びと仕事を、事業所に。</title>
+  <meta name="description" content="就労支援事業所に、IT・AI・クリエイティブの学習環境と仕事の機会を。教材・ライブ配信・エスピクトAIから、実案件の品質確認・納品まで。">
+  <meta property="og:title" content="エスピクトスクール | 学びと仕事を、事業所に。">
+  <meta property="og:description" content="就労支援事業所に、IT・AI・クリエイティブの学習環境と仕事の機会を。教材・ライブ配信・エスピクトAIから、実案件の品質確認・納品まで。">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" content="エスピクトスクール">
+  <meta property="og:image" content="https://espict-school.com/assets/brand/poster-hero-desktop.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/logo.webp">
+  <link rel="preload" href="assets/img/jappu-pointing.webp" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // JSが動く環境でだけ、登場アニメーション用の初期状態を有効にする
+    (function () {
+      var d = document.documentElement;
+      d.classList.add('js');
+      var pref = null;
+      try { pref = localStorage.getItem('espict-motion'); } catch (e) {}
+      if (pref === 'off' || (pref !== 'on' && matchMedia('(prefers-reduced-motion: reduce)').matches)) d.dataset.motion = 'off';
+    })();
+  </script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v15M6 13l6 6 6-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.2v13.6L19 12z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5v14M15.5 5v14"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M2.5 5h6A3.5 3.5 0 0 1 12 8.5V20a2.5 2.5 0 0 0-2.5-2.5h-7zM21.5 5h-6A3.5 3.5 0 0 0 12 8.5V20a2.5 2.5 0 0 1 2.5-2.5h7z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 11.5a8 8 0 0 1-11.7 7.1L3.5 20l1.4-4.8A8 8 0 1 1 20.5 11.5z"/><path d="M8.5 11.5h.01M12.5 11.5h.01M16.5 11.5h.01" stroke-width="2.8"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><path d="M9 3.5h6v3H9z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/><path d="m8.5 13.5 2.5 2.5 4.5-4.5"/></symbol>
+    <symbol id="i-case" viewBox="0 0 24 24"><path d="M3 8h18v12H3zM8.5 8V5h7v3M3 13.5h18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 4.5 4.5L19.5 7"/></symbol>
+    <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8 8a5.7 5.7 0 0 0 0 8M16 8a5.7 5.7 0 0 1 0 8M5.2 5.2a9.6 9.6 0 0 0 0 13.6M18.8 5.2a9.6 9.6 0 0 1 0 13.6"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h4a4.5 4.5 0 0 1 4.5 4.5V20M16 4.2a3.5 3.5 0 0 1 0 6.6M21.5 20v-1.5a4.5 4.5 0 0 0-3.2-4.3"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5.5L12 3v18M12 8.5h8V21M2.5 21h19M7.5 8h.01M7.5 12h.01M7.5 16h.01M16 12.5h.01M16 16.5h.01" /></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20.5 20.5-5.2-5.2"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m3 7.5 9-4.5 9 4.5-9 4.5zM3 7.5v9l9 4.5 9-4.5v-9M12 12v9"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 2.5h8.5L19 7v14.5H6zM14 2.5V7.5h5M9 12.5h7M9 16.5h5"/></symbol>
+    <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M4.5 5h15v10.5h-15zM2 19h20"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15.5V4M7 8.5 12 4l5 4.5M4.5 15v4.5h15V15"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3.5 18.5 10l-5.8 1.9-2 5.9z"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5 13.9 9 19.5 11l-5.6 1.9L12 18.5l-1.9-5.6L4.5 11 10.1 9z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5.5 21V3.5M5.5 4h12l-2.5 4.5 2.5 4.5h-12"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14.5 3.5h6v6M9.5 20.5h-6v-6M20.5 3.5l-7 7M3.5 20.5l7-7"/></symbol>
+    <symbol id="i-line" viewBox="0 0 24 24"><path d="M12 3.5c-5.2 0-9.5 3.4-9.5 7.6 0 3.8 3.4 6.9 8 7.5l-.6 2.4c-.1.4.3.7.7.5 3.3-1.9 10.9-6.1 10.9-10.4 0-4.2-4.3-7.6-9.5-7.6z" fill="currentColor" stroke="none"/></symbol>
+  </svg>
+
+  <a class="skip" href="#main">本文へ移動</a>
+  <button class="motion-btn" type="button" data-motion-toggle>
+    <svg class="icon icon--pause" aria-hidden="true"><use href="#i-pause"/></svg>
+    <svg class="icon icon--play" aria-hidden="true"><use href="#i-play"/></svg>
+    <span data-motion-label>動きを止める</span>
+  </button>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <header class="site-header" data-header aria-label="サイトヘッダー">
+    <a class="brand" href="#top" aria-label="エスピクトスクール ページの先頭へ">
+      <img src="assets/img/logo.webp" alt="" width="40" height="40">
+      <span>エスピクトスクール</span>
+    </a>
+    <nav class="gnav" aria-label="ページ内のご案内">
+      <ul>
+        <li><a href="#about">スクールについて</a></li>
+        <li><a href="#cases">活用イメージ</a></li>
+        <li><a href="#learning">学びと記録</a></li>
+        <li><a href="#work">取り組める仕事</a></li>
+        <li><a href="#projects">案件の進め方</a></li>
+        <li><a href="#start">導入の流れ</a></li>
+      </ul>
+    </nav>
+    <div class="site-header__actions">
+      <a class="header-personal" href="https://espict-school.com/personal">学びたい・働きたい方へ</a>
+      <a class="btn btn--primary btn--sm" href="https://mjup.co.jp/Contact" target="_blank" rel="noopener noreferrer">
+        <span class="btn__long">導入について相談する</span><span class="btn__short">相談する</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>
+      </a>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+        <span>メニュー</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="メニュー" hidden>
+    <div class="menu__inner">
+      <button class="menu__close" type="button" data-menu-close>
+        <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg><span>閉じる</span>
+      </button>
+      <p class="menu__label">ページ内のご案内</p>
+      <ul class="menu__list">
+        <li><a href="#about"><small>01</small>スクールについて</a></li>
+        <li><a href="#cases"><small>02</small>活用イメージ</a></li>
+        <li><a href="#learning"><small>03</small>学びと記録</a></li>
+        <li><a href="#work"><small>04</small>取り組める仕事</a></li>
+        <li><a href="#projects"><small>07</small>案件の進め方</a></li>
+        <li><a href="#start"><small>08</small>導入の流れ</a></li>
+        <li><a href="#faq"><small>09</small>よくあるご質問</a></li>
+      </ul>
+      <p class="menu__label">対象を切り替える</p>
+      <div class="menu__ctas">
+        <a class="btn btn--ghost" href="https://espict-school.com/personal">学びたい・働きたい方へ<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn--primary" href="https://mjup.co.jp/Contact" target="_blank" rel="noopener noreferrer">導入について相談する<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <canvas class="hero__pixels" aria-hidden="true"></canvas>
+      <div class="hero__slabs" aria-hidden="true" data-depth="0.6">
+        <i class="slab slab--cyan"></i>
+        <i class="slab slab--pink"></i>
+        <i class="slab slab--yellow"></i>
+        <i class="slab slab--ink"></i>
+        <i class="hero__dots"></i>
+      </div>
+
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <p class="hero__eyebrow" data-intro="1"><span class="hero__eyebrow-mark" aria-hidden="true"></span>就労支援事業所のための<br>学習・実践プログラム</p>
+          <h1 class="hero__title" id="hero-title">
+            <span class="sr-only">エスピクトスクール。学びと仕事を、事業所に。</span>
+            <span class="hero__line hero__line--1" aria-hidden="true" data-split>学びと仕事を、</span>
+            <span class="hero__line hero__line--2" aria-hidden="true" data-split>事業所に。</span>
+          </h1>
+          <p class="hero__lead" data-intro="3">利用者の方の「やってみたい」を、<br>事業所の新しい力に。</p>
+          <div class="hero__ctas" data-intro="4">
+            <a class="btn btn--primary btn--lg" href="https://mjup.co.jp/Contact" target="_blank" rel="noopener noreferrer" data-magnetic>
+              導入について相談する<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>
+            </a>
+            <a class="btn btn--ghost btn--lg" href="#film">
+              <span class="btn__play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>36秒でわかる紹介動画
+            </a>
+          </div>
+        </div>
+
+        <div class="hero__visual">
+          <div class="hero__jappu-wrap" data-depth="1.2">
+            <button class="hero__jappu" type="button" aria-label="じゃっぷちゃん（押すと話します）" data-jappu>
+              <img src="assets/img/jappu-pointing.webp" alt="" width="720" height="999" fetchpriority="high" decoding="async">
+            </button>
+          </div>
+          <p class="hero__bubble" data-bubble aria-live="polite"><span>やってみよう！</span></p>
+
+          <div class="sticker sticker--live" aria-hidden="true" data-depth="2">
+            <span class="sticker__pill"><i></i>LIVE</span>
+            <span class="sticker__title">動画編集 授業LIVE</span>
+            <span class="sticker__meta">毎日のライブ授業・質問対応</span>
+          </div>
+          <div class="sticker sticker--ai" aria-hidden="true" data-depth="2.6">
+            <span class="sticker__avatar">ぴ</span>
+            <span class="sticker__ai-text"><b>ぴくとに聞く</b><small>24時間・AI</small></span>
+            <span class="sticker__typing"><i></i><i></i><i></i></span>
+          </div>
+          <div class="sticker sticker--check" aria-hidden="true" data-depth="1.8">
+            <b>今日の取り組み</b>
+            <span class="sticker__row"><i></i>出席</span>
+            <span class="sticker__row"><i></i>取り組み時間</span>
+            <span class="sticker__row"><i></i>課題の提出</span>
+          </div>
+          <div class="sticker sticker--timeline" aria-hidden="true" data-depth="3">
+            <span class="tl__head"><i></i><i></i><i></i><b>timeline.edit</b></span>
+            <span class="tl__track"><i style="--w:38%;--c:var(--pink)"></i><i style="--w:26%;--c:var(--cyan)"></i><i style="--w:22%;--c:var(--yellow)"></i></span>
+            <span class="tl__track"><i style="--w:18%;--c:var(--cyan)"></i><i style="--w:44%;--c:#7ee0a8"></i><i style="--w:20%;--c:var(--pink)"></i></span>
+            <span class="tl__track tl__track--wave"></span>
+            <span class="tl__head-line"></span>
+          </div>
+        </div>
+      </div>
+
+      <p class="hero__hand" aria-hidden="true"><span>つくる。届ける。つながる。</span></p>
+    </section>
+
+    <!-- ============ MARQUEE ============ -->
+    <div class="belts" aria-hidden="true">
+      <div class="belt belt--yellow">
+        <div class="belt__track">
+          <span>動画編集</span><b>✦</b><span>SNS運用</span><b>✦</b><span>画像デザイン</span><b>✦</b><span>Web制作</span><b>✦</b><span>AI活用</span><b>✦</b><span>情報整理</span><b>✦</b><span>ゲーム・イベント</span><b>✦</b><span>イラスト</span><b>✦</b><span>配信サポート</span><b>✦</b><span>商品PR</span><b>✦</b><span>ライブコマース</span><b>✦</b>
+        </div>
+      </div>
+      <div class="belt belt--ink">
+        <div class="belt__track belt__track--rev">
+          <span>LEARN</span><b>●</b><span>学ぶ</span><b>●</b><span>ASK</span><b>●</b><span>聞く</span><b>●</b><span>MAKE</span><b>●</b><span>つくる</span><b>●</b><span>CHECK</span><b>●</b><span>確かめる</span><b>●</b><span>DELIVER</span><b>●</b><span>届ける</span><b>●</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <p class="bg-word" aria-hidden="true" data-drift>ABOUT</p>
+      <div class="container">
+        <header class="sec-head" data-reveal>
+          <p class="kicker"><span class="kicker__no">01</span><span class="kicker__en">ABOUT</span><span class="kicker__ja">エスピクトスクールとは</span></p>
+          <h2 class="sec-title" id="about-title">学ぶ環境と、<br><em>取り組める仕事を。</em></h2>
+          <p class="sec-lead">就労支援事業所に、デジタルの学習環境と実際の仕事を届けるサービスです。</p>
+        </header>
+
+        <div class="equation">
+          <article class="eq-card eq-card--learn" data-reveal>
+            <span class="eq-card__en" aria-hidden="true">LEARN</span>
+            <span class="eq-card__icon" aria-hidden="true"><svg class="icon"><use href="#i-book"/></svg></span>
+            <h3>教材・授業・AIで学ぶ</h3>
+            <p>毎日のライブ授業・質問対応と、24時間AI</p>
+          </article>
+          <span class="eq-op" aria-hidden="true" data-reveal>+</span>
+          <article class="eq-card eq-card--work" data-reveal>
+            <span class="eq-card__en" aria-hidden="true">WORK</span>
+            <span class="eq-card__icon" aria-hidden="true"><svg class="icon"><use href="#i-case"/></svg></span>
+            <h3>実際の仕事に取り組む</h3>
+            <p>案件の提供から、品質確認・納品まで支援</p>
+          </article>
+          <span class="eq-op eq-op--eq" aria-hidden="true" data-reveal>=</span>
+          <div class="eq-result" data-reveal>
+            <p>利用者の方の<br><strong>「できる」</strong>を増やし、<br>生産活動の<br>売上・工賃の向上へ。</p>
+            <img src="assets/img/jappu-face.webp" alt="" width="360" height="360" loading="lazy" decoding="async">
+          </div>
+        </div>
+
+        <p class="about__bridge" data-reveal>
+          <span>身につけた力を、誰かの役に立つ仕事へ。</span>
+          <a class="text-link" href="#work">取り組める仕事を見る<svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ FILM ============ -->
+    <section class="film" id="film" aria-labelledby="film-title">
+      <div class="container film__grid">
+        <div class="film__text" data-reveal>
+          <p class="kicker kicker--dark"><span class="kicker__en">MOVIE</span><span class="kicker__ja">サービス紹介動画</span></p>
+          <h2 class="film__title" id="film-title"><span class="film__line"><span class="film__num">36</span><span class="film__unit">秒でわかる</span></span><span class="film__line">エスピクトスクール</span></h2>
+          <p class="film__lead">学ぶ環境から、仕事の取り組み方まで。</p>
+          <p class="film__tag">テキスト付き・音声なし</p>
+        </div>
+        <figure class="film__figure" data-reveal>
+          <div class="player" data-player>
+            <video preload="none" playsinline muted poster="assets/video/service-film-poster.webp" width="1600" height="900" aria-describedby="film-caption">
+              <source src="assets/video/service-film.mp4" type="video/mp4">
+            </video>
+            <button class="player__start" type="button" data-player-start>
+              <span class="player__ring" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
+              <span class="player__label"><b>動画を再生</b><small>36秒・音声なし</small></span>
+            </button>
+          </div>
+          <figcaption id="film-caption">エスピクトスクール サービス紹介 / 音声なし・テキスト付き。アプリ・授業の紹介画像には画面イメージを含みます。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ CASES ============ -->
+    <section class="section cases" id="cases" aria-labelledby="cases-title">
+      <p class="bg-word" aria-hidden="true" data-drift>CASE</p>
+      <div class="container">
+        <header class="sec-head sec-head--center" data-reveal>
+          <p class="kicker"><span class="kicker__no">02</span><span class="kicker__en">CASE</span><span class="kicker__ja">事業所での活用イメージ</span></p>
+          <h2 class="sec-title" id="cases-title">今の課題から、<br><em>取り入れ方を考える。</em></h2>
+          <p class="sec-lead">教える体制、仕事の選択肢、在宅での活動。<br>事業所の状況に合わせた、3つのモデルケースです。</p>
+        </header>
+
+        <div class="case-tabs" data-tabs data-reveal>
+          <div class="case-tabs__list" role="tablist" aria-label="モデルケースを選ぶ">
+            <button class="case-tab" type="button" role="tab" id="case-tab-1" aria-controls="case-panel-1" aria-selected="true">
+              <span class="case-tab__no">01</span><span class="case-tab__label">教える体制を整える</span>
+            </button>
+            <button class="case-tab" type="button" role="tab" id="case-tab-2" aria-controls="case-panel-2" aria-selected="false" tabindex="-1">
+              <span class="case-tab__no">02</span><span class="case-tab__label">仕事の選択肢を広げる</span>
+            </button>
+            <button class="case-tab" type="button" role="tab" id="case-tab-3" aria-controls="case-panel-3" aria-selected="false" tabindex="-1">
+              <span class="case-tab__no">03</span><span class="case-tab__label">在宅での取り組みを用意する</span>
+            </button>
+            <span class="case-tabs__ink" aria-hidden="true"></span>
+          </div>
+
+          <div class="case-panel" role="tabpanel" id="case-panel-1" aria-labelledby="case-tab-1" tabindex="0">
+            <div class="case-before">
+              <p class="case-label">こんな課題、ありませんか？</p>
+              <h3 class="case-problem"><small>動画編集を続けたいのに</small>教えられる方が<br>退職してしまった</h3>
+              <p>パソコンもソフトもある。でも、次に何を教えればよいか分からない。</p>
+              <img class="case-jappu" src="assets/img/jappu-teaching.webp" alt="教え方を考え、顎に手を添えるじゃっぷちゃん" width="1024" height="1024" loading="lazy" decoding="async">
+            </div>
+            <div class="case-arrow" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="case-after">
+              <p class="case-label case-label--after"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg>エスピクトスクールで</p>
+              <h3 class="case-solution">教える土台は、<br><em>教材・授業・AI</em>に。</h3>
+              <p>教材で学び、実演で確かめ、疑問はAIへ。教える役割が、一人に偏らない学び方を用意します。</p>
+              <figure class="case-figure">
+                <img src="assets/img/case-learning.webp" alt="教材で操作を学び、AIに疑問を聞く学習環境のイメージ" width="1536" height="1024" loading="lazy" decoding="async">
+                <figcaption>活用イメージ / 実際のアプリ画面・納品物ではありません</figcaption>
+              </figure>
+              <p class="case-check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>日々の支援に目を向けられる</p>
+              <a class="text-link" href="#learning">学びと記録の仕組みを見る<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </div>
+          </div>
+
+          <div class="case-panel" role="tabpanel" id="case-panel-2" aria-labelledby="case-tab-2" tabindex="0" hidden>
+            <div class="case-before">
+              <p class="case-label">こんな課題、ありませんか？</p>
+              <h3 class="case-problem">軽作業が中心。<br>デジタルの仕事を<br>どう始めたらいい？</h3>
+              <p>受注先を探すことも、初心者への指導や納品の判断も、事業所だけでは難しい。</p>
+              <img class="case-jappu" src="assets/img/jappu-thinking.webp" alt="デジタルの仕事をどう始めようかと考えるじゃっぷちゃん" width="560" height="777" loading="lazy" decoding="async">
+            </div>
+            <div class="case-arrow" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="case-after">
+              <p class="case-label case-label--after"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg>エスピクトスクールで</p>
+              <h3 class="case-solution">字幕づけやカットから、<br><em>動画編集の仕事</em>へ。</h3>
+              <p>教材で学びながら、担当できる作業へ。提供案件は品質確認・納品まで支えます。</p>
+              <figure class="case-figure">
+                <img src="assets/img/case-video.webp" alt="じゃっぷちゃんの素材に字幕を付け、縦動画へ編集する制作イメージ" width="1448" height="1086" loading="lazy" decoding="async">
+                <figcaption>活用イメージ / 実際のアプリ画面・納品物ではありません</figcaption>
+              </figure>
+              <div class="case-model">
+                <span>モデルケース・事業所の案件額</span>
+                <strong><small>月</small>5万〜8万<small>円</small></strong>
+              </div>
+              <p class="case-check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>受注先探しから納品まで、事業所だけで抱えない</p>
+              <a class="text-link" href="#projects">案件の進め方を見る<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </div>
+          </div>
+
+          <div class="case-panel" role="tabpanel" id="case-panel-3" aria-labelledby="case-tab-3" tabindex="0" hidden>
+            <div class="case-before">
+              <p class="case-label">こんな課題、ありませんか？</p>
+              <h3 class="case-problem">在宅利用の相談を、<br>受け入れられなかった</h3>
+              <p>家で取り組める活動や、進み具合を確かめる方法がない。</p>
+              <img class="case-jappu" src="assets/img/jappu-remote.webp" alt="タブレットを持ち、在宅での取り組みを考えるじゃっぷちゃん" width="1024" height="1024" loading="lazy" decoding="async">
+            </div>
+            <div class="case-arrow" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="case-after">
+              <p class="case-label case-label--after"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg>エスピクトスクールで</p>
+              <h3 class="case-solution">自宅にも、<br><em>取り組める環境</em>を。</h3>
+              <p>教材やAIを自宅から利用。取り組みを記録し、何を進めたかを確かめられます。</p>
+              <figure class="case-figure">
+                <img src="assets/img/case-remote.webp" alt="自宅で教材やAIを使い、今日の取り組みを記録する環境のイメージ" width="1536" height="1024" loading="lazy" decoding="async">
+                <figcaption>活用イメージ / 実際のアプリ画面・納品物ではありません</figcaption>
+              </figure>
+              <p class="case-check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>通所が難しい日の、活動の選択肢に</p>
+              <p class="note">在宅利用には自治体の判断や事業所の支援体制などの要件があります。</p>
+              <a class="text-link" href="#records">取り組みの記録を見る<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-cases">
+          <h3 class="mini-cases__title" data-reveal>こんな課題にも、<em>選択肢を。</em></h3>
+          <div class="mini-cases__grid">
+            <article class="mini-case" data-reveal>
+              <div class="mini-case__q">
+                <span class="mini-case__tag"><svg class="icon" aria-hidden="true"><use href="#i-cursor"/></svg>操作の疑問</span>
+                <p>同じ操作の質問が重なり、職員の方の手が止まる</p>
+              </div>
+              <div class="mini-case__a">
+                <h4>自分で確かめる入口を、AIにも。</h4>
+                <p>操作の疑問や文章の下書きは、エスピクトAIへ。職員の方に聞く以外にも、自分で確かめながら進める選択肢を用意します。</p>
+                <a class="text-link" href="#ai">エスピクトAIを見る<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              </div>
+            </article>
+            <article class="mini-case" data-reveal>
+              <div class="mini-case__q">
+                <span class="mini-case__tag"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>学び方の違い</span>
+                <p>一人ひとりで進み方が違い、一斉には教えにくい</p>
+              </div>
+              <div class="mini-case__a">
+                <h4>教材とアーカイブで、それぞれのペースへ。</h4>
+                <p>はじめての操作は教材で、忘れた手順はアーカイブで。必要なところに戻って確かめられるので、全員が同じ速さで進む必要はありません。</p>
+                <a class="text-link" href="#lessons">教材と授業を見る<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              </div>
+            </article>
+            <article class="mini-case" data-reveal>
+              <div class="mini-case__q">
+                <span class="mini-case__tag"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>日々の振り返り</span>
+                <p>何に取り組んだか、あとから振り返りにくい</p>
+              </div>
+              <div class="mini-case__a">
+                <h4>その日の取り組みを、記録に残す。</h4>
+                <p>進めた内容や気づきを専用アプリに記録。日々の活動を振り返り、次に取り組む内容を考える材料にできます。</p>
+                <a class="text-link" href="#records">取り組みの記録を見る<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              </div>
+            </article>
+          </div>
+          <p class="note note--center">上記は活用方法を説明するモデルケースで、実在の事業所の証言・成果実績ではありません。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APP / LEARNING ============ -->
+    <section class="section app" id="learning" aria-labelledby="app-title">
+      <p class="bg-word" aria-hidden="true" data-drift>APP</p>
+      <div class="container">
+        <header class="sec-head sec-head--center" data-reveal>
+          <p class="kicker"><span class="kicker__no">03</span><span class="kicker__en">APP</span><span class="kicker__ja">エスピクトスクール専用アプリ</span></p>
+          <h2 class="sec-title" id="app-title"><em>学ぶ、聞く、取り組む。</em><br>毎日の入口を、ひとつに。</h2>
+          <p class="sec-lead">利用者の方には、自分のペースで学び進める環境を。<br>職員の方には、日々の取り組みを確かめられる環境を。</p>
+        </header>
+
+        <figure class="app-hero" data-reveal>
+          <div class="browser">
+            <div class="browser__bar" aria-hidden="true"><i></i><i></i><i></i><span>espict-school.com</span></div>
+            <img src="assets/img/app-home.webp" alt="じゃっぷちゃんと、教材を選ぶ・ぴくとに聞く・取り組みを残すという専用アプリの3つの入口を表した紹介ビジュアル" width="1536" height="1024" loading="lazy" decoding="async">
+          </div>
+          <figcaption>
+            <span>実際の機能をもとにした紹介用ビジュアル</span>
+            <button class="real-btn" type="button" data-shot="home"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>ホームの実画面を拡大</button>
+          </figcaption>
+        </figure>
+
+        <div class="story" data-story>
+          <div class="story__chapters">
+            <article class="chapter" id="lessons" data-chapter="0">
+              <p class="chapter__no"><span>01</span>教材とライブ授業</p>
+              <h3 class="chapter__title">毎日、ライブ授業。<br><em>その場で質問もできる。</em></h3>
+              <p>毎日ライブ配信で授業と質問対応を提供。専用アプリから参加し、講師の実演を見ながら学べます。見逃した授業はアーカイブで確認できます。</p>
+              <figure class="chapter__figure">
+                <img src="assets/img/app-lesson.webp" alt="字幕を入れる操作を講師が実演し、質問を確かめながら進むライブ授業のイメージ" width="1536" height="1024" loading="lazy" decoding="async">
+              </figure>
+              <p class="chapter__caption">授業イメージ / 講師・教材画面は説明用に生成したものです</p>
+              <ul class="feature-list">
+                <li><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span><b>教材で学ぶ</b>基礎から、次に挑戦したいテーマまで</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-live"/></svg><span><b>毎日の授業・質問対応</b>講師の操作を見て、分からないところを質問</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-history"/></svg><span><b>何度でも振り返る</b>アーカイブを自分のペースで</span></li>
+              </ul>
+              <div class="chapter__more">
+                <h4>専門的な学びは、教材・講師・AIが支えます。</h4>
+                <p>専門的な操作は教材と講師の実演で。職員の方がすべてを教える前提にせず、日々の声かけや活動ペースの確認に目を向けられます。</p>
+                <h4>案件とともに増える、実践教材。</h4>
+                <p>基礎教材の更新に加え、案件ごとの取り組み方を解説する動画を用意。新しい案件で学びを広げ、過去案件を使った模擬訓練にも繰り返し取り組めます。</p>
+              </div>
+              <button class="real-btn" type="button" data-shot="lessons"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>教材一覧の実画面を確認</button>
+            </article>
+
+            <article class="chapter" id="ai" data-chapter="1">
+              <p class="chapter__no"><span>02</span>エスピクトAI「ぴくと」</p>
+              <h3 class="chapter__title">授業のあとも、自宅でも。<br><em>24時間、ぴくとに聞ける。</em></h3>
+              <p>操作で迷ったら、その場でAIに質問。職員の方に聞く以外にも、自分で手順を確かめながら進める選択肢を用意しています。</p>
+              <figure class="chapter__figure">
+                <img src="assets/img/app-ai.webp" alt="字幕の文字サイズを質問し、画像付きの回答を見て修正したあと、位置の変更もぴくとに相談する会話のイメージ" width="1536" height="1024" loading="lazy" decoding="async">
+              </figure>
+              <p class="chapter__caption">AIとの相談イメージ / 画像回答の表現案。現在の回答画面とは異なります</p>
+              <ul class="feature-list feature-list--chips">
+                <li><svg class="icon" aria-hidden="true"><use href="#i-cursor"/></svg><span><b>操作の質問</b></span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-pen"/></svg><span><b>文章の下書き</b></span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span><b>見直しのヒント</b></span></li>
+              </ul>
+              <p class="note">回答は内容を確かめて活用。体調や福祉支援の相談は事業所へ。</p>
+              <button class="real-btn" type="button" data-shot="ai"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>ぴくとの実際の回答を確認</button>
+            </article>
+
+            <article class="chapter" id="records" data-chapter="2">
+              <p class="chapter__no"><span>03</span>出席・取り組みの記録</p>
+              <h3 class="chapter__title">日々の取り組みが、<br><em>職員の方にも見える。</em></h3>
+              <p>誰が、いつ、何に取り組んだか。出席・学習時間・課題の提出を、専用アプリでまとめて確認できます。</p>
+              <figure class="chapter__figure">
+                <img src="assets/img/app-records.webp" alt="学習・実践時間、提出と一週間の取り組みをまとめて振り返る、事業所向け記録画面の構想" width="1536" height="1024" loading="lazy" decoding="async">
+              </figure>
+              <p class="chapter__caption">記録の活用イメージ / サンプルデータ / 事業所向け表示の構想。現在の実装画面ではありません</p>
+              <ul class="feature-list feature-list--chips">
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><b>出席の確認</b></span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span><b>取り組み時間</b></span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span><b>課題の提出</b></span></li>
+              </ul>
+              <div class="chapter__more">
+                <h4>取り組みの振り返りにも、活動の確認にも。</h4>
+                <p>利用者の方は自分の取り組みを振り返り、職員の方は一人ひとりの活動を把握。通所・在宅での取り組みを、記録から確かめられます。</p>
+              </div>
+              <p class="note">記録は日々の振り返りの材料です。福祉サービスとしての支援・記録は事業所で行います。</p>
+              <button class="real-btn" type="button" data-shot="records"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>記録の実画面を確認</button>
+            </article>
+          </div>
+
+          <div class="story__stage">
+            <div class="story__sticky">
+              <div class="device">
+                <div class="device__bar" aria-hidden="true"><i></i><i></i><i></i><span data-stage-title>01 教材とライブ授業</span></div>
+                <div class="device__screen" data-stage>
+                  <img class="is-active" src="assets/img/app-lesson.webp" alt="字幕を入れる操作を講師が実演し、質問を確かめながら進むライブ授業のイメージ" width="1536" height="1024" decoding="async" loading="lazy">
+                  <img src="assets/img/app-ai.webp" alt="字幕の文字サイズを質問し、画像付きの回答を見て修正したあと、位置の変更もぴくとに相談する会話のイメージ" width="1536" height="1024" decoding="async" loading="lazy">
+                  <img src="assets/img/app-records.webp" alt="学習・実践時間、提出と一週間の取り組みをまとめて振り返る、事業所向け記録画面の構想" width="1536" height="1024" decoding="async" loading="lazy">
+                </div>
+              </div>
+              <p class="story__caption" data-stage-caption aria-hidden="true">授業イメージ / 講師・教材画面は説明用に生成したものです</p>
+              <ol class="story__dots" aria-hidden="true">
+                <li class="is-active"><span>01</span>教材とライブ授業</li>
+                <li><span>02</span>ぴくと</li>
+                <li><span>03</span>記録</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WORKS ============ -->
+    <section class="works" id="work" aria-labelledby="works-title">
+      <div class="works__pin" data-works>
+        <div class="works__sticky">
+          <div class="works__rail" data-works-rail>
+            <header class="works__head">
+              <p class="kicker kicker--dark"><span class="kicker__no">04</span><span class="kicker__en">WORKS</span><span class="kicker__ja">取り組める仕事</span></p>
+              <h2 class="sec-title sec-title--dark" id="works-title">興味の数だけ、<br><em>仕事への入口</em><br>がある。</h2>
+              <p class="sec-lead">利用者の方の興味に合わせて、できる作業から。制作・発信・運営を支える仕事があります。</p>
+              <p class="works__hint" aria-hidden="true"><span class="works__hint-scroll">SCROLL</span><span class="works__hint-swipe">SWIPE</span><svg class="icon"><use href="#i-right"/></svg></p>
+            </header>
+            <div class="works__track" data-works-track role="region" aria-label="取り組める仕事の一覧" tabindex="0">
+
+            <article class="job" style="--accent: var(--cyan)">
+              <figure class="job__media"><img src="assets/img/work-video.webp" alt="じゃっぷちゃんが紹介する商品動画のカット・字幕・音声を編集し、スマートフォン向けの縦動画にも仕上げる制作イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">01</p>
+                <h3 class="job__title">動画編集</h3>
+                <p class="job__desc">YouTube動画、企業・商品の紹介動画、ショート動画。素材をつなぎ、音や文字を整えて、伝わる一本に仕上げます。</p>
+                <ul class="chips"><li>カット編集</li><li>テロップ・字幕</li><li>BGM・音量調整</li><li>色味の調整</li><li>縦動画への再編集</li><li>書き出し</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>不要な場面のカットや、字幕の入力から。</p>
+              </div>
+            </article>
+
+            <article class="job" style="--accent: var(--pink)">
+              <figure class="job__media"><img src="assets/img/work-social.webp" alt="じゃっぷちゃんの投稿画像を並べたスマートフォンと、投稿カレンダー・文章案でSNS発信を計画する制作イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">02</p>
+                <h3 class="job__title">SNS運用・投稿制作</h3>
+                <p class="job__desc">お店や企業の発信を、企画から投稿まで。画像・文章・投稿スケジュールを整え、継続した発信を支えます。</p>
+                <ul class="chips"><li>投稿企画</li><li>投稿画像</li><li>キャプション</li><li>ハッシュタグ</li><li>投稿予約</li><li>反応の振り返り</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>投稿画像の文字替えや、文章の下書きから。</p>
+              </div>
+            </article>
+
+            <article class="job" style="--accent: var(--yellow)">
+              <figure class="job__media"><img src="assets/img/work-design.webp" alt="ポスターや紙面レイアウト、配色見本、タブレットとスマートフォンのWebページを並べたデザイン制作イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">03</p>
+                <h3 class="job__title">画像デザイン・Web制作</h3>
+                <p class="job__desc">ロゴやサムネイルから、チラシ、Webページまで。文字・写真・色を組み合わせ、お店や企業の魅力を見える形にします。</p>
+                <ul class="chips"><li>ロゴ制作</li><li>サムネイル</li><li>バナー</li><li>チラシ</li><li>Webページ制作</li><li>ページ更新</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>テンプレートの文字や写真の差し替えから。</p>
+              </div>
+            </article>
+
+            <article class="job" style="--accent: var(--cyan)">
+              <figure class="job__media"><img src="assets/img/work-research.webp" alt="じゃっぷちゃんと、出典を確かめて調査リストに整理し、まとめの資料へ仕上げる情報整理の仕事イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">04</p>
+                <h3 class="job__title">AI活用・情報整理</h3>
+                <p class="job__desc">調べた情報やAIの下書きを、確認して使える形に。企業・商品のリサーチ、比較表、文章やデータの整理に取り組みます。</p>
+                <ul class="chips"><li>情報リサーチ</li><li>出典確認</li><li>データ入力</li><li>表・リスト作成</li><li>文章の下書き</li><li>内容の見直し</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>指定された情報を調べ、リストにまとめることから。</p>
+              </div>
+            </article>
+
+            <article class="job" style="--accent: var(--pink)">
+              <figure class="job__media"><img src="assets/img/work-game.webp" alt="じゃっぷちゃんと、ゲーム内の不具合を記録する画面・再現手順・イベント進行表を確認する仕事イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">05</p>
+                <h3 class="job__title">ゲーム・イベント関連</h3>
+                <p class="job__desc">ゲームを動かして不具合を確かめ、再現手順を報告。大会の準備や進行にも関わり、体験を裏側から支えます。</p>
+                <ul class="chips"><li>テストプレイ</li><li>不具合の報告</li><li>告知制作</li><li>対戦表の作成</li><li>進行の補助</li><li>結果の記録</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>決められた手順で動作を確かめ、結果を記録することから。</p>
+              </div>
+            </article>
+
+            <article class="job" style="--accent: var(--yellow)">
+              <figure class="job__media"><img src="assets/img/work-creator.webp" alt="マイクと音声調整、じゃっぷちゃんの2Dアバターや素材を準備する配信サポートの制作イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">06</p>
+                <h3 class="job__title">イラスト・配信サポート</h3>
+                <p class="job__desc">キャラクターやアイコンのイラスト、配信画面に使う素材、2Dキャラクターの制作補助。描くことも、配信を裏側から支えることも、取り組みにつながります。</p>
+                <ul class="chips"><li>キャラクター・アイコン</li><li>線画・着彩</li><li>背景・小物</li><li>配信素材</li><li>2D制作補助</li><li>配信準備</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>線画の色塗りや、素材の切り出しから。</p>
+              </div>
+            </article>
+
+            <article class="job" style="--accent: var(--cyan)">
+              <figure class="job__media"><img src="assets/img/work-commerce.webp" alt="架空のキャラクターマグを撮影ブースとスマートフォンで撮影し、商品紹介に使う画像・動画を作る仕事イメージ" width="1536" height="1152" loading="lazy" decoding="async"></figure>
+              <div class="job__body">
+                <p class="job__no" aria-hidden="true">07</p>
+                <h3 class="job__title">商品PR・ライブコマース</h3>
+                <p class="job__desc">商品を撮り、魅力を伝え、購入のきっかけをつくる。写真や紹介動画から、ライブ配信の台本・進行の補助まで、販売を支える制作に取り組みます。</p>
+                <ul class="chips"><li>商品撮影</li><li>画像補正</li><li>紹介動画</li><li>商品説明文</li><li>配信台本</li><li>配信進行の補助</li></ul>
+                <p class="job__first"><span><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>はじめの一歩</span>商品情報の整理や、写真の明るさ調整から。</p>
+              </div>
+            </article>
+
+            <div class="works__end">
+              <p class="works__end-title">興味に合わせて、<br>はじめの一歩から。</p>
+              <a class="btn btn--cyan" href="#roles">取り組み方の例を見る<svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></a>
+            </div>
+            </div>
+          </div>
+
+          <div class="works__ui">
+            <p class="works__count" aria-hidden="true"><b data-works-current>01</b> / 07</p>
+            <div class="works__nav">
+              <button type="button" class="round-btn" data-works-prev aria-label="前の仕事へ"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
+              <button type="button" class="round-btn" data-works-next aria-label="次の仕事へ"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+            </div>
+            <div class="works__bar" aria-hidden="true"><span data-works-bar></span></div>
+          </div>
+        </div>
+      </div>
+      <p class="works__note">画像は仕事内容を伝えるための制作イメージです。登場する商品・イベントは架空の題材で、実績や販売品ではありません。案件の内容・募集状況・参加条件は個別にご案内します。</p>
+    </section>
+
+    <!-- ============ ROLES ============ -->
+    <section class="section roles" id="roles" aria-labelledby="roles-title">
+      <p class="bg-word" aria-hidden="true" data-drift>ROLES</p>
+      <div class="container roles__grid">
+        <header class="sec-head roles__head" data-reveal>
+          <p class="kicker"><span class="kicker__no">05</span><span class="kicker__en">ROLES</span><span class="kicker__ja">取り組み方の例 / 配信告知の制作</span></p>
+          <h2 class="sec-title" id="roles-title">ひとつの仕事に、<br><em>いくつもの役割</em>がある。</h2>
+          <p class="sec-lead">全員が同じ作業をする必要はありません。興味や経験、取り組みやすい内容から、担当する作業を考えます。</p>
+          <p class="note">説明用のモデルケース。実在の利用者・受注実績ではありません。</p>
+
+          <div class="brief">
+            <span class="brief__label">今回の依頼を想定</span>
+            <strong>配信の情報をまとめ、告知画像と投稿文に</strong>
+          </div>
+
+          <div class="roles__buttons" role="group" aria-label="担当する役割を選ぶと、右の制作ボードに反映されます">
+            <button type="button" class="role-btn" data-role="research" aria-pressed="false">
+              <span class="role-btn__no" aria-hidden="true">A</span>
+              <span class="role-btn__text"><b>調べる・整理する</b><small>配信日時、テーマ、必要な素材をまとめる</small></span>
+              <span class="role-btn__state" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="role-btn" data-role="make" aria-pressed="false">
+              <span class="role-btn__no" aria-hidden="true">B</span>
+              <span class="role-btn__text"><b>つくる・整える</b><small>画像のサイズや文字を調整し、投稿文の下書きを作る</small></span>
+              <span class="role-btn__state" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="role-btn" data-role="check" aria-pressed="false">
+              <span class="role-btn__no" aria-hidden="true">C</span>
+              <span class="role-btn__text"><b>確かめる・仕上げる</b><small>日時の表記、誤字、画像サイズをチェックする</small></span>
+              <span class="role-btn__state" aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="roles__tools">
+            <button type="button" class="btn btn--primary btn--sm" data-roles-play><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>順番に見る</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-roles-reset>リセット</button>
+          </div>
+        </header>
+
+        <div class="board" data-board data-reveal>
+          <div class="board__head" aria-hidden="true">
+            <span class="board__dots"><i></i><i></i><i></i></span>
+            <span>制作ボード（説明用のモデルケース）</span>
+            <span class="board__progress"><i data-board-meter></i></span>
+          </div>
+          <div class="board__body">
+            <div class="board__memo board-part" data-part="research">
+              <p class="board__part-label"><span>A</span>配信メモ</p>
+              <dl>
+                <div><dt>日時</dt><dd><span class="type">○月○日（○）20:00〜</span></dd></div>
+                <div><dt>テーマ</dt><dd><span class="type">イラストメイキング配信</span></dd></div>
+                <div><dt>素材</dt><dd><span class="type">キャラクター画像・ロゴ・背景</span></dd></div>
+              </dl>
+            </div>
+
+            <div class="board__post board-part" data-part="make">
+              <p class="board__part-label"><span>B</span>告知画像と投稿文</p>
+              <div class="post">
+                <div class="post__visual" aria-hidden="true">
+                  <i class="post__stripe"></i>
+                  <img src="assets/img/jappu-face.webp" alt="" width="360" height="360" loading="lazy" decoding="async">
+                  <span class="post__title">配信の<br>お知らせ</span>
+                  <span class="post__date">○/○ 20:00〜</span>
+                  <span class="post__size" data-size>1080 × 1080</span>
+                </div>
+                <p class="post__caption">【配信のお知らせ】○月○日（○）20:00から、イラストメイキング配信をします。ぜひ見に来てくだ<ins class="fix">さ</ins>い！</p>
+              </div>
+            </div>
+
+            <div class="board__check board-part" data-part="check">
+              <p class="board__part-label"><span>C</span>チェックリスト</p>
+              <ul>
+                <li><i></i>日時の表記</li>
+                <li><i></i>誤字</li>
+                <li><i></i>画像サイズ</li>
+              </ul>
+              <div class="board__stamp" aria-hidden="true">完成！</div>
+            </div>
+
+            <div class="board__empty">
+              <p>役割を選ぶと、<br>ここに取り組みが反映されます。</p>
+            </div>
+          </div>
+          <p class="board__status" data-board-status aria-live="polite">役割を選んでください。</p>
+        </div>
+
+        <div class="roles__foot" data-reveal>
+          <p class="roles__foot-title"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>自分の取り組みが、誰かの発信を支える</p>
+          <p>学ぶだけでなく、実際に使われるものに関わる経験へ。担当できる範囲は、本人の状況と案件の条件に合わせて確認します。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCHEME ============ -->
+    <section class="section scheme" id="support" aria-labelledby="scheme-title">
+      <p class="bg-word" aria-hidden="true" data-drift>SCHEME</p>
+      <div class="container">
+        <header class="sec-head sec-head--center" data-reveal>
+          <p class="kicker"><span class="kicker__no">06</span><span class="kicker__en">SCHEME</span><span class="kicker__ja">事業所と企業を、学びと仕事でつなぐ</span></p>
+          <h2 class="sec-title" id="scheme-title">それぞれの役割で、<br><em>仕事が届く仕組みを。</em></h2>
+          <p class="sec-lead">日々の支援を担う事業所と、仕事を依頼する企業。<br>その間を、エスピクトスクールがつなぎます。</p>
+        </header>
+
+        <div class="network" data-reveal>
+          <article class="node node--office">
+            <span class="node__icon" aria-hidden="true"><svg class="icon"><use href="#i-users"/></svg></span>
+            <h3>事業所・利用者</h3>
+            <p class="node__role">日々の支援と作業</p>
+            <p>事業所が活動を支え、利用者の方が担当作業に取り組む</p>
+          </article>
+          <div class="wire wire--left" aria-hidden="true">
+            <span class="wire__lane wire__lane--to-left"><b>学ぶ環境・案件</b><i></i></span>
+            <span class="wire__lane wire__lane--to-right"><b>取り組み・提出</b><i></i></span>
+          </div>
+          <article class="node node--hub">
+            <span class="node__logo" aria-hidden="true"><img src="assets/img/logo.webp" alt="" width="96" height="96" loading="lazy"></span>
+            <h3>エスピクトスクール</h3>
+            <p class="node__role">学ぶ環境と仕事の提供</p>
+            <p>実案件の斡旋・提供から、品質確認・納品まで</p>
+          </article>
+          <div class="wire wire--right" aria-hidden="true">
+            <span class="wire__lane wire__lane--to-left"><b>仕事の依頼</b><i></i></span>
+            <span class="wire__lane wire__lane--to-right"><b>確認・納品</b><i></i></span>
+          </div>
+          <article class="node node--company">
+            <span class="node__icon" aria-hidden="true"><svg class="icon"><use href="#i-building"/></svg></span>
+            <h3>依頼する企業</h3>
+            <p class="node__role">仕事の依頼と条件の共有</p>
+            <p>目的や納品条件を共有し、案件に応じて確認</p>
+          </article>
+        </div>
+        <p class="sr-only">企業からエスピクトスクールへ仕事を依頼。エスピクトスクールから事業所へ学ぶ環境と案件を提供し、事業所から取り組みを提出。確認・納品を経て企業へ届けます。</p>
+        <p class="note note--center">仕事と支援の関係を表したイメージ図です。契約・支払いの経路を示すものではありません。</p>
+
+        <div class="deals" data-reveal>
+          <div class="deals__copy">
+            <p class="kicker kicker--dark"><span class="kicker__en">PROJECTS</span><span class="kicker__ja">実際の案件も斡旋・提供</span></p>
+            <h3 class="deals__title">学びの先に、<br><em>実際の仕事を</em></h3>
+            <p>作業内容・数量・期間を確認し、事業所の体制に合う案件をご案内します。</p>
+            <a class="text-link text-link--dark" href="#projects">案件の進め方と役割を見る<svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></a>
+          </div>
+          <div class="deals__figure">
+            <p class="deals__label">斡旋・提供している案件の金額帯</p>
+            <p class="deals__range">
+              <span class="sr-only">5万〜60万円</span>
+              <span class="deals__num" data-count="5" aria-hidden="true">5</span><span class="deals__unit" aria-hidden="true">万</span><span class="deals__tilde" aria-hidden="true">〜</span><span class="deals__num" data-count="60" aria-hidden="true">60</span><span class="deals__unit" aria-hidden="true">万円</span>
+            </p>
+            <ul class="deals__tags"><li>動画編集</li><li>画像制作</li><li>Web制作など</li></ul>
+            <p class="deals__note">案件の金額であり、利用者個人の工賃やサービス利用料金ではありません。発注条件は個別にご案内し、一定の仕事量や収益を保証するものではありません。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FLOW ============ -->
+    <section class="flow" id="projects" aria-labelledby="flow-title">
+      <div class="container">
+        <header class="sec-head" data-reveal>
+          <p class="kicker kicker--on-cyan"><span class="kicker__no">07</span><span class="kicker__en">FLOW</span><span class="kicker__ja">実案件の進め方</span></p>
+          <h2 class="sec-title" id="flow-title">仕事が届いてから、<br>納品まで</h2>
+          <p class="sec-lead">案件の案内から品質確認・納品まで、エスピクトが支えます。</p>
+        </header>
+
+        <div class="pipeline" data-pipeline>
+          <div class="pipeline__rail" aria-hidden="true"><span class="pipeline__fill"></span><span class="pipeline__packet"><svg class="icon"><use href="#i-doc"/></svg></span></div>
+          <ol class="pipeline__steps">
+            <li class="pstep">
+              <span class="pstep__icon" aria-hidden="true"><svg class="icon"><use href="#i-doc"/></svg></span>
+              <span class="pstep__no">01</span>
+              <p class="pstep__who">エスピクトが案内</p>
+              <h3>案件・条件の共有</h3>
+            </li>
+            <li class="pstep">
+              <span class="pstep__icon" aria-hidden="true"><svg class="icon"><use href="#i-laptop"/></svg></span>
+              <span class="pstep__no">02</span>
+              <p class="pstep__who">利用者が取り組む</p>
+              <h3>作業・提出</h3>
+            </li>
+            <li class="pstep">
+              <span class="pstep__icon" aria-hidden="true"><svg class="icon"><use href="#i-search"/></svg></span>
+              <span class="pstep__no">03</span>
+              <p class="pstep__who">エスピクト・企業側で確認</p>
+              <h3>品質の確認</h3>
+            </li>
+            <li class="pstep">
+              <span class="pstep__icon" aria-hidden="true"><svg class="icon"><use href="#i-box"/></svg></span>
+              <span class="pstep__no">04</span>
+              <p class="pstep__who">エスピクトが納品管理</p>
+              <h3>依頼元へ納品</h3>
+            </li>
+          </ol>
+        </div>
+
+        <figure class="flow__poster" data-reveal>
+          <picture>
+            <source media="(max-width: 700px)" srcset="assets/img/flow-mobile.webp" width="887" height="1774">
+            <img src="assets/img/flow-desktop.webp" alt="配信告知の画像制作を例に、案件の案内、担当する作業、品質確認、納品へ進む4段階のイメージ" width="1832" height="858" loading="lazy" decoding="async">
+          </picture>
+          <figcaption>説明用の制作例です。実際の案件・アプリ画面ではありません。</figcaption>
+        </figure>
+
+        <div class="flow__terms" data-reveal>
+          <p class="flow__terms-title"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>受注は、条件を確認してから</p>
+          <p>担当範囲・納期・報酬・変更時の連絡方法を、事業所と確認します。</p>
+        </div>
+        <p class="note note--center note--on-cyan">案件の内容・報酬・参加条件は個別に確認します。一定の仕事量や収益を保証するものではありません。</p>
+      </div>
+    </section>
+
+    <!-- ============ START ============ -->
+    <section class="section start" id="start" aria-labelledby="start-title">
+      <p class="bg-word" aria-hidden="true" data-drift>START</p>
+      <div class="container">
+        <header class="sec-head sec-head--center" data-reveal>
+          <p class="kicker"><span class="kicker__no">08</span><span class="kicker__en">START</span><span class="kicker__ja">導入までの流れ</span></p>
+          <h2 class="sec-title" id="start-title">体験して、確かめて、<br><em>導入へ</em></h2>
+          <p class="sec-lead">利用者の方に合うか、日々の活動に取り入れられるか。<br>実際の使い方と条件を確認してから、導入を検討できます。</p>
+        </header>
+
+        <div class="stages" data-stages>
+          <svg class="stages__path" aria-hidden="true"><path class="stages__path-base"/><path class="stages__path-fill"/></svg>
+          <div class="stages__avatar" aria-hidden="true"><img src="assets/img/jappu-face.webp" alt="" width="360" height="360" loading="lazy" decoding="async"></div>
+          <ol class="stages__list">
+            <li class="stage" data-reveal>
+              <span class="stage__pin" aria-hidden="true"></span>
+              <figure class="stage__media"><img src="assets/img/start-consultation.webp" alt="現在の活動、PC環境、職員体制、希望する取り組みを確認するチェックシートとじゃっぷちゃん" width="960" height="640" loading="lazy" decoding="async"></figure>
+              <p class="stage__no">STAGE 01</p>
+              <h3 class="stage__title"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>ご相談</h3>
+              <p class="stage__sub">今の活動と、ご希望を共有</p>
+              <p>利用者の方の興味、現在の活動、PC環境や職員体制を伺います。まだ分野が決まっていなくても、ご相談いただけます。</p>
+            </li>
+            <li class="stage" data-reveal>
+              <span class="stage__pin" aria-hidden="true"></span>
+              <figure class="stage__media"><img src="assets/img/start-trial.webp" alt="教材・AI・記録を体験する、エスピクトスクールのアプリ紹介イメージ" width="960" height="640" loading="lazy" decoding="async"></figure>
+              <p class="stage__no">STAGE 02</p>
+              <h3 class="stage__title"><svg class="icon" aria-hidden="true"><use href="#i-laptop"/></svg>サービス体験</h3>
+              <p class="stage__sub">教材・AI・記録を実際に体験</p>
+              <p>教材・AIに加え、出席や取り組みの記録・確認まで体験。利用者の方がどう進め、職員の方がどう関わるかを確かめ、ライブ授業への参加方法もご案内します。</p>
+            </li>
+            <li class="stage" data-reveal>
+              <span class="stage__pin" aria-hidden="true"></span>
+              <figure class="stage__media"><img src="assets/img/start-conditions.webp" alt="利用内容、必要な設備、契約条件を確認する3つの書類" width="960" height="640" loading="lazy" decoding="async"></figure>
+              <p class="stage__no">STAGE 03</p>
+              <h3 class="stage__title"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>条件の確認</h3>
+              <p class="stage__sub">利用内容と条件を確認</p>
+              <p>利用条件・費用・必要な設備をご案内します。事業所の活動や体制に合うか、導入前に一緒に確認します。</p>
+            </li>
+            <li class="stage" data-reveal>
+              <span class="stage__pin" aria-hidden="true"></span>
+              <figure class="stage__media"><img src="assets/img/start-start.webp" alt="パソコンと教材を準備し、学習を始めるじゃっぷちゃんのイメージ" width="960" height="640" loading="lazy" decoding="async"></figure>
+              <p class="stage__no">STAGE 04</p>
+              <h3 class="stage__title"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>利用開始</h3>
+              <p class="stage__sub">PCの準備から、利用開始まで</p>
+              <p>今あるPC・ソフト・通信環境を確認し、必要に応じてPCのレンタル・販売もご相談いただけます。アカウントと初期操作を確かめ、日々の活動へ。</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="start__cta" data-reveal>
+          <a class="btn btn--primary btn--lg" href="https://mjup.co.jp/Contact" target="_blank" rel="noopener noreferrer" data-magnetic>体験について相談する<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <p>Mjupの公式お問い合わせ窓口へ進みます</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section faq" id="faq" aria-labelledby="faq-title">
+      <p class="bg-word" aria-hidden="true" data-drift>Q&amp;A</p>
+      <div class="container faq__grid">
+        <header class="sec-head" data-reveal>
+          <p class="kicker"><span class="kicker__no">09</span><span class="kicker__en">Q&amp;A</span><span class="kicker__ja">よくあるご質問</span></p>
+          <h2 class="sec-title" id="faq-title">よくある<br><em>ご質問</em></h2>
+          <p class="sec-lead">学び方、設備、実案件について。事業所での利用を考えるときの疑問にお答えします。</p>
+        </header>
+        <div class="faq__list" data-reveal>
+          <details class="qa" open>
+            <summary><span class="qa__q" aria-hidden="true">Q</span><span class="qa__text">職員の方に専門的な知識がなくても導入できますか？</span><span class="qa__toggle" aria-hidden="true"></span></summary>
+            <div class="qa__a">
+              <p class="qa__lead">職員の方だけで、専門的な指導を抱える必要はありません。</p>
+              <p>教材に加え、毎日のライブ授業・質問対応とアーカイブを活用できます。操作や課題の疑問は24時間使えるエスピクトAIでも確認できます。日々の声かけ、体調や活動ペースの確認は事業所にお願いします。</p>
+            </div>
+          </details>
+          <details class="qa">
+            <summary><span class="qa__q" aria-hidden="true">Q</span><span class="qa__text">未経験の方でも取り組めますか？</span><span class="qa__toggle" aria-hidden="true"></span></summary>
+            <div class="qa__a">
+              <p class="qa__lead">基礎教材から、取り組みやすい内容を選べます。</p>
+              <p>全員が同じ作業をする前提ではありません。興味や経験に合わせて学び、実案件では必要なスキルと担当できる範囲を案件ごとに確認します。</p>
+            </div>
+          </details>
+          <details class="qa">
+            <summary><span class="qa__q" aria-hidden="true">Q</span><span class="qa__text">どのようなパソコンや設備が必要ですか？</span><span class="qa__toggle" aria-hidden="true"></span></summary>
+            <div class="qa__a">
+              <p class="qa__lead">取り組む分野に合わせて、今のPC環境から確認します。</p>
+              <p>動画編集・デザイン・調査など、内容によって必要な環境は異なります。現在の設備を伺い、必要なソフトや通信環境をご案内します。PCのレンタル・販売もご相談いただけます。</p>
+            </div>
+          </details>
+          <details class="qa">
+            <summary><span class="qa__q" aria-hidden="true">Q</span><span class="qa__text">在宅利用にも活用できますか？</span><span class="qa__toggle" aria-hidden="true"></span></summary>
+            <div class="qa__a">
+              <p class="qa__lead">在宅での学習やデジタルの作業にも活用できます。</p>
+              <p>教材・ライブ配信・AIを、事業所の支援と組み合わせて利用します。在宅利用の可否は自治体の判断や事業所の支援体制によります。福祉サービスとしての支援がアプリだけで完結するものではありません。</p>
+            </div>
+          </details>
+          <details class="qa">
+            <summary><span class="qa__q" aria-hidden="true">Q</span><span class="qa__text">欠席や体調の変化で、案件が進まないときは？</span><span class="qa__toggle" aria-hidden="true"></span></summary>
+            <div class="qa__a">
+              <p class="qa__lead">変更が分かった時点で、案件の担当窓口へ共有します。</p>
+              <p>受注前に作業量・分担・確認日・連絡先を整理し、変更時の対応を相談します。代行や納期延長の可否は案件によって異なります。</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FINALE ============ -->
+    <section class="finale" id="contact" aria-labelledby="finale-title">
+      <div class="finale__art" aria-hidden="false">
+        <img src="assets/img/finale.webp" alt="ヘッドホンに手を添えて微笑むじゃっぷちゃん。エスピクトスクールのキービジュアル" width="1672" height="941" loading="lazy" decoding="async">
+      </div>
+      <div class="container finale__inner">
+        <div class="finale__copy" data-reveal>
+          <p class="kicker"><span class="kicker__en">FOR YOUR TOWN</span><span class="kicker__ja">地域に、新しい選択肢を。</span></p>
+          <h2 class="finale__title" id="finale-title"><span class="nowrap">選ばれ続ける</span><br><em>事業所に</em></h2>
+          <p class="finale__lead">「ここで学びたい」<br>そう思える場所を、この地域に。</p>
+          <p>教えてくれる人と、挑戦できる環境を。<br>事業所の新しい魅力を、一緒につくります。</p>
+          <div class="finale__ctas">
+            <a class="btn btn--primary btn--xl" href="https://mjup.co.jp/Contact" target="_blank" rel="noopener noreferrer" data-magnetic>まずは、導入のご相談から<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn--line btn--xl" href="https://lin.ee/BhmHZ7K" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-line"/></svg>LINEで相談</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <a class="brand brand--footer" href="#top">
+        <img src="assets/img/logo.webp" alt="" width="40" height="40" loading="lazy">
+        <span>エスピクトスクール</span>
+      </a>
+      <ul class="site-footer__links">
+        <li><a href="https://espict-school.com/personal">学びたい・働きたい方へ<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+        <li><a href="https://espict-school.com/login" target="_blank" rel="noopener noreferrer">スクールアプリ<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+        <li><a href="https://mjup.co.jp/Company" target="_blank" rel="noopener noreferrer">運営会社<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+        <li><a href="https://mjup.co.jp/Contact" target="_blank" rel="noopener noreferrer">お問い合わせ<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></li>
+      </ul>
+    </div>
+    <p class="wordmark" aria-hidden="true" data-wordmark>ESPICT SCHOOL</p>
+    <div class="container site-footer__bottom">
+      <p><small>© Mjup Inc.</small><small>就労支援事業所向けサービス</small></p>
+      <a href="#top" class="to-top">BACK TO TOP<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+  </footer>
+
+  <div class="dock" data-dock>
+    <a class="line-btn" href="https://lin.ee/BhmHZ7K" target="_blank" rel="noopener noreferrer">
+      <svg class="icon" aria-hidden="true"><use href="#i-line"/></svg><span>LINEで相談</span>
+    </a>
+  </div>
+
+  <dialog class="shot" data-shot-dialog aria-labelledby="shot-title">
+    <div class="shot__inner">
+      <div class="shot__head">
+        <div>
+          <p class="shot__meta" data-shot-meta></p>
+          <h2 class="shot__title" id="shot-title" data-shot-title>今日の取り組み</h2>
+        </div>
+        <button type="button" class="round-btn" data-shot-close aria-label="実画面を閉じる"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="shot__canvas"><img data-shot-img src="assets/img/real-home.webp" alt="エスピクトスクール専用アプリの今日の取り組み。2026.10.01撮影の実画面から一部抜粋" width="938" height="626" loading="lazy"></div>
+    </div>
+  </dialog>
+</body>
+</html>
