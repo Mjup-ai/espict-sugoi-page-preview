@@ -358,7 +358,7 @@
           panels[i].classList.remove('is-entering'); void panels[i].offsetWidth; panels[i].classList.add('is-entering');
         }
       });
-      if (focus) tab.focus();
+      if (focus) tab.focus({ preventScroll: true });
       moveInk();
     };
     tabs.forEach((t, i) => {
@@ -372,6 +372,14 @@
         if (n !== null) { e.preventDefault(); select(tabs[n], true); }
       });
     });
+    // "次のケース" buttons at the end of each panel
+    const hint = $('.case-tabs__hint', tabsRoot);
+    $$('[data-case-go]', tabsRoot).forEach((btn) => btn.addEventListener('click', () => {
+      const tab = tabs[parseInt(btn.dataset.caseGo, 10) - 1];
+      if (!tab) return;
+      select(tab, true);
+      (hint || tab).scrollIntoView({ behavior: motionOn() ? 'smooth' : 'auto', block: 'start' });
+    }));
     onResizeFns.push(moveInk);
     moveInk();
   }
@@ -621,6 +629,117 @@
         if (!Object.values(state).some(Boolean)) play(false);
       }
     }, { threshold: 0.45 }).observe(board);
+  }
+
+  /* =========================================================
+     SCHEME — pattern B: loop (∞) diagram
+     Path order: hub → office → hub → company → hub.
+     Segments 0/2 leave the hub (届ける), 1/3 come back (集まる).
+     ========================================================= */
+  const loopEl = $('[data-loop]');
+  if (loopEl) {
+    const svg = $('.loop__svg', loopEl);
+    const track = $('.loop__track', loopEl);
+    const flow = $('.loop__flow', loopEl);
+    const dotsG = $('.loop__dots', loopEl);
+    const labels = $$('[data-loop-label]', loopEl);
+    const nodeEl = (k) => $(`[data-loop-node="${k}"]`, loopEl);
+    const NS = 'http://www.w3.org/2000/svg';
+    const dots = Array.from({ length: 6 }, () => {
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('r', '7');
+      dotsG.appendChild(c);
+      return c;
+    });
+    let len = 0; let marks = []; let visible = false; let raf = 0;
+
+    const drawDots = (now) => {
+      if (!len) return;
+      dots.forEach((c, i) => {
+        const at = ((now / 1000) * 120 + (i * len) / dots.length) % len;
+        const p = flow.getPointAtLength(at);
+        c.setAttribute('cx', p.x.toFixed(1));
+        c.setAttribute('cy', p.y.toFixed(1));
+        const seg = at < marks[1] ? 0 : at < marks[2] ? 1 : at < marks[3] ? 2 : 3;
+        c.setAttribute('fill', seg % 2 === 0 ? '#ffd83d' : '#00bffb');
+      });
+    };
+    const measure = () => {
+      if (!loopEl.getClientRects().length) return; // pattern not shown
+      const box = loopEl.getBoundingClientRect();
+      const center = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top]; };
+      const H = center(nodeEl('hub')); const O = center(nodeEl('office')); const K = center(nodeEl('company'));
+      const horizontal = Math.abs(K[0] - O[0]) > Math.abs(K[1] - O[1]);
+      const dir = (q) => { const dx = q[0] - H[0]; const dy = q[1] - H[1]; const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l, l]; };
+      const [ux, uy, dO] = dir(O); const [vx, vy, dK] = dir(K);
+      const n = horizontal ? [0, 1] : [1, 0]; // outgoing arcs below (wide) / right (narrow)
+      const r = horizontal ? Math.min(210, Math.max(dO, dK) * 0.52) : Math.min(box.width * 0.37, 150);
+      const at = (p, d, s, t) => [p[0] + d[0] * s + n[0] * t, p[1] + d[1] * s + n[1] * t];
+      const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+      const u = [ux, uy]; const v = [vx, vy];
+      const segs = [
+        `C ${f(at(H, u, dO * 0.34, r))} ${f(at(O, u, -dO * 0.3, r))} ${f(O)}`,
+        `C ${f(at(O, u, -dO * 0.3, -r))} ${f(at(H, u, dO * 0.34, -r))} ${f(H)}`,
+        `C ${f(at(H, v, dK * 0.34, r))} ${f(at(K, v, -dK * 0.3, r))} ${f(K)}`,
+        `C ${f(at(K, v, -dK * 0.3, -r))} ${f(at(H, v, dK * 0.34, -r))} ${f(H)}`,
+      ];
+      svg.setAttribute('viewBox', `0 0 ${box.width.toFixed(0)} ${box.height.toFixed(0)}`);
+      let d = `M ${f(H)}`;
+      marks = [0];
+      segs.forEach((s) => { d += ` ${s}`; track.setAttribute('d', d); marks.push(track.getTotalLength()); });
+      flow.setAttribute('d', d);
+      len = marks[4];
+      // each label sits on the middle of its arc; its arrow follows the direction of travel
+      labels.forEach((lab, i) => {
+        const mid = (marks[i] + marks[i + 1]) / 2;
+        const p = flow.getPointAtLength(mid);
+        const a = flow.getPointAtLength(Math.max(0, mid - 3)); const b = flow.getPointAtLength(Math.min(len, mid + 3));
+        lab.style.left = `${p.x.toFixed(1)}px`;
+        lab.style.top = `${p.y.toFixed(1)}px`;
+        lab.style.setProperty('--angle', `${(Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI).toFixed(1)}deg`);
+      });
+      loopEl.classList.add('is-ready');
+      drawDots(motionOn() ? performance.now() : 0);
+    };
+    const tick = (now) => {
+      raf = 0;
+      if (!visible || !motionOn() || document.hidden || !len) return;
+      drawDots(now);
+      raf = requestAnimationFrame(tick);
+    };
+    const start = () => { if (!raf && visible && motionOn() && !document.hidden) raf = requestAnimationFrame(tick); };
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !len) measure(); start(); }).observe(loopEl);
+    document.addEventListener('visibilitychange', start);
+    document.addEventListener('motionchange', () => { if (motionOn()) start(); else drawDots(0); });
+    document.addEventListener('schemechange', () => { measure(); start(); });
+    onResizeFns.push(measure);
+  }
+
+  /* ---------- comparison switch for the diagram patterns (A/B/C) ---------- */
+  const schemeVariants = $('[data-scheme-variants]');
+  if (schemeVariants) {
+    const variants = $$('[data-variant]', schemeVariants);
+    const switchBtns = $$('[data-scheme-btn]');
+    const show = (key, remember) => {
+      if (!variants.some((v) => v.dataset.variant === key)) key = 'a';
+      variants.forEach((v) => {
+        const on = v.dataset.variant === key;
+        if (on && v.hidden && motionOn()) { v.classList.remove('is-entering'); void v.offsetWidth; v.classList.add('is-entering'); }
+        v.hidden = !on;
+      });
+      switchBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.schemeBtn === key)));
+      if (remember) {
+        // keep the choice in the URL so a pattern can be shared (?scheme=b#support)
+        try {
+          const url = new URL(location.href);
+          if (key === 'a') url.searchParams.delete('scheme'); else url.searchParams.set('scheme', key);
+          history.replaceState(null, '', url);
+        } catch (e) { /* some browsers block this on file:// */ }
+      }
+      document.dispatchEvent(new CustomEvent('schemechange'));
+    };
+    switchBtns.forEach((b) => b.addEventListener('click', () => show(b.dataset.schemeBtn, true)));
+    show(new URLSearchParams(location.search).get('scheme') || 'a', false);
   }
 
   /* =========================================================
