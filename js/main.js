@@ -9,8 +9,305 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const mqDesktop = matchMedia('(min-width: 1000px)');
+  // sticky story / pinned gallery: wide screens, but not tall portrait tablets (1024×1366 etc.)
+  const mqWideLayout = matchMedia('(min-width: 1200px), (min-width: 1000px) and (orientation: landscape)');
   const mqFine = matchMedia('(hover: hover) and (pointer: fine)');
   const motionOn = () => root.dataset.motion !== 'off';
+
+  /* ---------- Japanese line breaks at phrase boundaries (BudouX) ----------
+     Breaks only between phrases, and keeps the last two phrases of each line-group together,
+     so no lone characters end up on the last line — in every browser, including older Safari
+     without `text-wrap: pretty`. Text that JS rewrites later, and the per-character hero title, are left alone. */
+  let phraseBreak = () => {};
+  if (typeof window.budouxJa === 'function') {
+    const parser = window.budouxJa({ className: 'bdx', separator: document.createElement('wbr') });
+    const SKIP = '[data-split], .belt, .bg-word, .wordmark, .sr-only, .sticker, [aria-live], [data-stage-title], [data-stage-caption], .deals__range, .film__time, [data-count], script, style, svg';
+    const JA = /[\u3040-\u30ff\u3400-\u9fff]/;
+    const blockOf = (node) => {
+      for (let a = node.parentElement; a; a = a.parentElement) {
+        const d = getComputedStyle(a).display;
+        if (d !== 'inline' && d !== 'contents') return a;
+      }
+      return null;
+    };
+    const blocks = new Set();
+    for (const root of $$('main, footer, .menu')) {
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let t;
+      while ((t = w.nextNode())) {
+        if (!JA.test(t.nodeValue) || !t.parentElement || t.parentElement.closest(SKIP)) continue;
+        const b = blockOf(t);
+        if (b && !b.matches(SKIP)) blocks.add(b);
+      }
+    }
+    const outermost = [...blocks].filter((el) => { for (let a = el.parentElement; a; a = a.parentElement) if (blocks.has(a)) return false; return true; });
+    outermost.forEach((el) => {
+      try { parser.applyToElement(el); } catch (e) { /* leave this block as is */ }
+      // BudouX only marks text it actually split; mark the rest too, so short titles get the same rules
+      el.classList.add('bdx');
+    });
+
+    // ---- phrase fix-ups on top of BudouX ----
+    // The block's text and its <wbr>/<br> marks, in reading order (nested .bdx blocks are their own unit).
+    const scan = (block) => {
+      const items = [];
+      const w = document.createTreeWalker(block, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+        acceptNode: (n) => (n.nodeType === 1 && n !== block && n.classList.contains('bdx') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+      });
+      let n;
+      while ((n = w.nextNode())) {
+        if (n.nodeType === 3) items.push({ text: n });
+        else if (n.tagName === 'WBR' || n.tagName === 'BR') items.push({ mark: n });
+      }
+      return items;
+    };
+    const visible = (s) => s.replace(/[\s​]/g, '');
+    // text between two marks (or the segment start/end)
+    const around = (items, i) => {
+      let before = ''; let after = '';
+      for (let k = i - 1; k >= 0 && !items[k].mark; k--) before = items[k].text.nodeValue + before;
+      for (let k = i + 1; k < items.length && !items[k].mark; k++) after += items[k].text.nodeValue;
+      return { before: visible(before), after: visible(after) };
+    };
+    const KATA = /[゠-ヺー-ヿ]/; // katakana (incl. ー), without the middle dot 「・」
+    const KANJI = /[㐀-鿿々]/;
+    const LATIN = /[A-Za-z]/;
+    const OPEN = /[「『（(【〈《［]/;
+    const CLOSE = /^[、。，．,.」』）)】〉》］！？!?…・ーぁぃぅぇぉっゃゅょゎ\/／]/;
+    const PUNCT_ONLY = /[\s​、。，．,.」』）)】〉》！？!?…・「『（(【〈《\/／]/g;
+    const script = (ch) => (KATA.test(ch) ? 'k' : KANJI.test(ch) ? 'c' : LATIN.test(ch) ? 'l' : '');
+
+    const kanjiTail = (s) => (s.match(/[\u3400-\u9fff\u3005]+$/) || [''])[0].length;
+    const kanjiHead = (s) => (s.match(/^[\u3400-\u9fff\u3005]+/) || [''])[0].length;
+    // 1) remove poor break points
+    const prune = (block) => {
+      const items = scan(block);
+      items.forEach((it, i) => {
+        if (!it.mark || it.mark.tagName !== 'WBR') return;
+        const { before, after } = around(items, i);
+        const a = before.slice(-1); const b = after.slice(0, 1);
+        const sa = script(a); const sb = script(b);
+        const remove =
+          (KATA.test(a) && KATA.test(b)) ||                         // inside a katakana word (ショー|ト)
+          (sa && sb && sa !== sb) ||                                // inside a compound (福祉|サービス, アプリ|画面); see 5)
+          a === '・' ||                                             // inside a list (制作・|発信); see 5)
+          (a === 'と' && after.startsWith('して')) ||                // と|して
+          (a === 'の' && b === '方') ||                              // 利用者の|方
+          (/(^|[^㐀-鿿])[㐀-鿿][りけきしいちみ]$/.test(before) && KANJI.test(b)) || // 取り|組み, 振り|返り
+          (kanjiTail(before) && kanjiHead(after) && kanjiTail(before) + kanjiHead(after) <= 4) ||   // short kanji compounds: 質問|対応, 紹介|動画
+          OPEN.test(a) ||                                            // right after an opening bracket
+          CLOSE.test(after);                                         // right before closing punctuation or a slash
+        if (remove) it.mark.remove();
+      });
+    };
+
+    // 2) short bracketed groups never break inside: （1分32秒）, 「できる」を (older Safari breaks right after 「 and （)
+    const BR = /[「『（(【][^「『（(【」』）)】]{1,14}[」』）)】][をがはにのともへで]?/g;
+    // numbers with separators (20:00〜, 2026.10.01, ○/○) never break inside — WebKit treats the colon as a break point
+    const NUM = /[0-9０-９○]+(?:[:：.．,，\/／][0-9０-９○]+)+[〜~]?/g;
+    const groupNumbers = (block) => {
+      scan(block).forEach((it) => {
+        if (!it.text || it.text.parentElement.closest('.nb, .nw')) return;
+        NUM.lastIndex = 0;
+        if (!NUM.test(it.text.nodeValue)) return;
+        NUM.lastIndex = 0;
+        const t = it.text; const v = t.nodeValue; const frag = document.createDocumentFragment();
+        let last = 0; let m;
+        while ((m = NUM.exec(v))) {
+          if (m.index > last) frag.append(v.slice(last, m.index));
+          const span = document.createElement('span'); span.className = 'nb'; span.textContent = m[0];
+          frag.append(span); last = m.index + m[0].length;
+        }
+        if (last < v.length) frag.append(v.slice(last));
+        t.replaceWith(frag);
+      });
+    };
+    const groupBrackets = (block) => {
+      groupNumbers(block);
+      scan(block).forEach((it) => {
+        if (!it.text || it.text.parentElement.closest('.nb, .nw')) return;
+        BR.lastIndex = 0;
+        if (!BR.test(it.text.nodeValue)) return;
+        BR.lastIndex = 0;
+        const t = it.text; const v = t.nodeValue; const frag = document.createDocumentFragment();
+        let last = 0; let m;
+        while ((m = BR.exec(v))) {
+          if (m.index > last) frag.append(v.slice(last, m.index));
+          const span = document.createElement('span'); span.className = 'nb'; span.textContent = m[0];
+          frag.append(span); last = m.index + m[0].length;
+        }
+        if (last < v.length) frag.append(v.slice(last));
+        t.replaceWith(frag);
+      });
+      // a particle in the next text node (<strong>「できる」</strong>を): wrap the element and the particle together
+      const texts = scan(block).filter((it) => it.text);
+      for (let k = 1; k < texts.length; k++) {
+        const a = texts[k - 1].text; const b = texts[k].text;
+        if (!/[」』）)】]$/.test(a.nodeValue) || !/^[をがはにのともへで]/.test(b.nodeValue)) continue;
+        let el = a.parentElement;
+        while (el && el !== block && el.parentElement !== b.parentElement) el = el.parentElement;
+        if (!el || el === block || el.nextSibling !== b) continue;
+        const span = document.createElement('span'); span.className = 'nb';
+        el.before(span); span.append(el);
+        b.splitText(1); span.append(b);
+      }
+    };
+
+    // 3) a break point at the start or end of an inline element moves outside it
+    //    (otherwise a highlighted phrase leaves a sliver of its background at the end of the previous line)
+    const meaningful = (n) => n && (n.nodeType === 1 ? n.tagName !== 'WBR' : /[^\s​]/.test(n.nodeValue));
+    const hoist = (block) => {
+      block.querySelectorAll('wbr').forEach((w) => {
+        if (w.closest('.bdx') !== block) return;
+        for (let guard = 0; guard < 8; guard++) {
+          const p = w.parentElement;
+          if (!p || p === block || getComputedStyle(p).display !== 'inline') break;
+          let prev = w.previousSibling; while (prev && !meaningful(prev)) prev = prev.previousSibling;
+          if (!prev) { p.before(w); continue; }
+          let next = w.nextSibling; while (next && !meaningful(next)) next = next.nextSibling;
+          if (!next) { p.after(w); continue; }
+          break;
+        }
+      });
+    };
+
+    // 4) glue a short last phrase (1–3 characters, like 「ある。」) to the phrase before it
+    const glueLast = (block) => {
+      const items = scan(block);
+      let seg = [];
+      const flushSeg = () => {
+        const marks = seg.map((it, i) => (it.mark ? i : -1)).filter((i) => i >= 0);
+        if (marks.length) {
+          const i = marks[marks.length - 1];
+          const lastText = visible(seg.slice(i + 1).map((it) => (it.text ? it.text.nodeValue : '')).join('')).replace(PUNCT_ONLY, '');
+          const prevStart = marks.length > 1 ? marks[marks.length - 2] + 1 : 0;
+          const prevText = visible(seg.slice(prevStart, i).map((it) => (it.text ? it.text.nodeValue : '')).join(''));
+          if (lastText.length <= 3 && lastText.length + prevText.length <= 9) seg[i].mark.remove();
+        }
+        seg = [];
+      };
+      items.forEach((it) => { if (it.mark && it.mark.tagName === 'BR') flushSeg(); else seg.push(it); });
+      flushSeg();
+    };
+
+    // 5) emergency break points, only for phrases wider than their box — at the edges of words
+    //    (where the script changes, after 「・」, around brackets). Redone whenever the box width changes.
+    const ctx = document.createElement('canvas').getContext('2d');
+    const widthOf = (t) => {
+      const s = getComputedStyle(t.parentElement);
+      ctx.font = `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
+      const v = t.nodeValue.replace(/​/g, '');
+      return ctx.measureText(v).width + (parseFloat(s.letterSpacing) || 0) * v.length;
+    };
+    const kind = (ch) => (/[0-9０-９]/.test(ch) ? 'd' : /[぀-ゟ]/.test(ch) ? 'h' : KATA.test(ch) ? 'k' : KANJI.test(ch) ? 'c' : LATIN.test(ch) ? 'l' : 'p');
+    const CLOSE_BR = /[」』）)】〉》］]/;
+    const emergency = (block) => {
+      block.querySelectorAll('wbr[data-e]').forEach((w) => { if (w.closest('.bdx') === block) w.remove(); });
+      const cs = getComputedStyle(block);
+      // a little safety margin: canvas measurements run slightly narrower than the laid-out text
+      const W = block.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(cs.fontSize) * 0.6;
+      if (!(W > 0)) return;
+      block.querySelectorAll('.nbx').forEach((s) => {
+        if (s.closest('.bdx') !== block) return;
+        const wSpan = [...s.childNodes].reduce((acc, n) => acc + (n.nodeType === 3 ? widthOf(n) : 0), 0);
+        // short phrases (企業・商品の) stay whole; long lists may break after 「・」 like normal text
+        s.classList.toggle('open', wSpan > W * 0.5);
+      });
+      let run = [];
+      const flush = () => {
+        const total = run.reduce((s, t) => s + widthOf(t), 0);
+        if (total > W) {
+          // the phrase as one string, mapped back to (text node, offset) — break points often sit between nodes
+          const map = []; let str = '';
+          run.forEach((t) => { for (let o = 0; o < t.nodeValue.length; o++) { const ch = t.nodeValue[o]; if (/[\s​]/.test(ch)) continue; map.push([t, o]); str += ch; } });
+          // strong break points first (after 「・」, around brackets); word-edge points (where the script
+          // changes) only inside pieces that still don't fit — so 投稿スケジュール stays whole when it can
+          const strong = []; const weak = [];
+          for (let i = 2; i <= str.length - 2; i++) {
+            const c0 = str[i - 1]; const c1 = str[i];
+            const g1 = map[i][0].parentElement.closest('.nb, .nw, .nbx:not(.open)');
+            if (g1 && g1 === map[i - 1][0].parentElement.closest('.nb, .nw, .nbx:not(.open)')) continue;
+            const k0 = kind(c0); const k1 = kind(c1);
+            const rest = str.slice(i);
+            const beforeOpen = OPEN.test(c1) && !OPEN.test(c0);
+            const afterClose = CLOSE_BR.test(c0) && !CLOSE.test(rest) && !OPEN.test(c1) && k1 !== 'h';
+            const plain = !CLOSE.test(rest) && !OPEN.test(c0) && k1 !== 'h' && k0 !== 'd' && k1 !== 'd';
+            if (beforeOpen || afterClose || (plain && c0 === '・' && k1 !== 'p')) strong.push(i);
+            else if (plain && k0 !== k1 && k0 !== 'p' && k1 !== 'p') weak.push(i);
+          }
+          const perChar = total / str.length;
+          const bounds = [0, ...strong, str.length];
+          const chosen = [...strong];
+          for (let b = 1; b < bounds.length; b++) {
+            const from = bounds[b - 1]; const to = bounds[b];
+            if ((to - from) * perChar > W) weak.filter((i) => i > from && i < to).forEach((i) => chosen.push(i));
+          }
+          const cuts = chosen.sort((x, y) => x - y).map((i) => map[i]);
+          // insert from the end so earlier offsets stay valid
+          cuts.reverse().forEach(([t, o]) => {
+            const w = document.createElement('wbr'); w.dataset.e = '1';
+            if (o === 0) t.before(w); else t.splitText(o).before(w);
+          });
+        }
+        run = [];
+      };
+      scan(block).forEach((it) => { if (it.mark) flush(); else run.push(it.text); });
+      flush();
+    };
+
+    // 4b) browsers always allow a break after 「・」 (even with keep-all): keep phrases like 企業・商品の together
+    //     with a no-wrap span; 5) opens it again (class .open) only when the phrase is wider than its box
+    const guardDots = (block) => {
+      let run = [];
+      const flush = () => {
+        const str = run.map((t) => t.nodeValue).join('');
+        const parent = run.length && run[0].parentElement;
+        if (/・(?!\s*$)/.test(str) && run.every((t) => t.parentElement === parent) && !parent.closest('.nb, .nw, .nbx')) {
+          const span = document.createElement('span'); span.className = 'nbx';
+          run[0].before(span); run.forEach((t) => span.append(t));
+        }
+        run = [];
+      };
+      scan(block).forEach((it) => { if (it.mark) flush(); else run.push(it.text); });
+      flush();
+    };
+    const fixBlock = (block) => { prune(block); groupBrackets(block); hoist(block); glueLast(block); guardDots(block); };
+    $$('.bdx').forEach(fixBlock);
+    // emergency points depend on the box width: (re)done when it changes. The work runs in the next frame,
+    // outside the observer callback, and each block remembers the width it settled at — so our own changes
+    // (wrapping a guarded phrase can resize a shrink-to-fit box) never start a resize loop.
+    const lastW = new WeakMap();
+    const innerW = (el) => { const s = getComputedStyle(el); return Math.round(el.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)); };
+    const pending = new Set();
+    let frame = 0;
+    const settle = () => {
+      frame = 0;
+      const els = [...pending]; pending.clear();
+      els.forEach((el) => {
+        const w = innerW(el);
+        if (!w || lastW.get(el) === w) return;
+        emergency(el);
+        lastW.set(el, innerW(el));
+      });
+    };
+    const ro = 'ResizeObserver' in window ? new ResizeObserver((entries) => {
+      entries.forEach((e) => { if (Math.round(e.contentRect.width) !== lastW.get(e.target)) pending.add(e.target); });
+      if (pending.size && !frame) frame = requestAnimationFrame(settle);
+    }) : null;
+    const watch = (el) => { if (ro) ro.observe(el); else emergency(el); };
+    $$('.bdx').forEach(watch);
+    // measurements change once the web fonts have arrived
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => $$('.bdx').forEach((b) => { if (lastW.has(b)) { emergency(b); lastW.set(b, innerW(b)); } }));
+    phraseBreak = (el) => {
+      el.classList.remove('bdx');
+      try { parser.applyToElement(el); } catch (e) { return; }
+      el.classList.add('bdx');
+      fixBlock(el);
+      emergency(el);
+      lastW.set(el, innerW(el));
+      watch(el);
+    };
+  }
 
   /* ---------- shared scroll / resize loop ---------- */
   const onScrollFns = [];
@@ -44,20 +341,20 @@
   }
 
   /* ---------- motion switch ---------- */
-  const motionBtn = $('[data-motion-toggle]');
-  const motionLabel = $('[data-motion-label]');
+  const motionBtns = $$('[data-motion-toggle]');
   const syncMotionLabel = () => {
-    if (motionLabel) motionLabel.textContent = motionOn() ? '動きを止める' : '動きを再開する';
-    if (motionBtn) motionBtn.setAttribute('aria-label', motionOn() ? 'アニメーションを止める' : 'アニメーションを再開する');
+    const label = motionOn() ? '動きを止める' : '動きを再開する';
+    $$('[data-motion-label]').forEach((el) => { el.textContent = label; });
+    motionBtns.forEach((b) => b.setAttribute('title', label));
   };
   syncMotionLabel();
-  motionBtn?.addEventListener('click', () => {
+  motionBtns.forEach((btn) => btn.addEventListener('click', () => {
     if (motionOn()) root.dataset.motion = 'off'; else delete root.dataset.motion;
     try { localStorage.setItem('espict-motion', motionOn() ? 'on' : 'off'); } catch (e) { /* private mode */ }
     syncMotionLabel();
     document.dispatchEvent(new CustomEvent('motionchange'));
     runResize();
-  });
+  }));
 
   /* ---------- header: hide on scroll down, show on scroll up ---------- */
   const header = $('[data-header]');
@@ -110,7 +407,25 @@
     $('[data-menu-close]', menu).focus();
   });
   $('[data-menu-close]', menu).addEventListener('click', () => closeMenu());
-  menu.addEventListener('click', (e) => { if (e.target.closest('a')) closeMenu(false); });
+  menu.addEventListener('click', (e) => { if (e.target.closest('a') && !e.target.closest('a[href^="#"]')) closeMenu(false); });
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const id = a.getAttribute('href');
+    const target = id.length > 1 ? document.getElementById(id.slice(1)) : null;
+    if (!target) return;
+    e.preventDefault();
+    if (!menu.hidden) closeMenu(false);
+    requestAnimationFrame(() => {
+      const pad = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+      const y = Math.max(0, target.getBoundingClientRect().top + window.scrollY - pad);
+      window.scrollTo({ top: y, behavior: motionOn() ? 'smooth' : 'auto' });
+      if (location.hash !== id) history.pushState(null, '', id);
+      // move keyboard focus along without scrolling again
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
+    });
+  });
   menu.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { closeMenu(); return; }
     if (e.key !== 'Tab') return;
@@ -411,10 +726,11 @@
       const img = stageImgs[next];
       stageTitle.textContent = titles[next];
       stageCaption.textContent = captions[next];
+      phraseBreak(stageCaption);
       dots.forEach((d, i) => d.classList.toggle('is-active', i === next));
       if (motionOn()) {
         try { await img.decode(); } catch (e) { /* show anyway */ }
-        const cols = 10; const rows = 7; const step = 26;
+        const cols = 10; const rows = 7; const step = queued !== null ? 0 : 14;
         const grid = document.createElement('div');
         grid.className = 'wipe';
         grid.style.setProperty('--cols', cols); grid.style.setProperty('--rows', rows);
@@ -430,7 +746,7 @@
           }
         }
         stage.appendChild(grid);
-        await new Promise((res) => setTimeout(res, (cols + rows) * step + 520));
+        await new Promise((res) => setTimeout(res, (cols + rows) * step + 380));
         stageImgs.forEach((im, i) => im.classList.toggle('is-active', i === next));
         grid.remove();
       } else {
@@ -442,9 +758,9 @@
     };
 
     onScrollFns.push((y, vh) => {
-      if (!mqDesktop.matches) return;
+      if (!mqWideLayout.matches) return;
       let idx = 0;
-      chapters.forEach((c, i) => { if (c.getBoundingClientRect().top < vh * 0.5) idx = i; });
+      chapters.forEach((c, i) => { if (c.getBoundingClientRect().top < vh * 0.6) idx = i; });
       if (idx !== active || busy) wipeTo(idx);
       else queued = null;
     });
@@ -466,8 +782,10 @@
       const s = SHOTS[btn.dataset.shot];
       if (!s) return;
       opener = btn;
-      $('[data-shot-meta]', shotDialog).textContent = `${s.role} / 実際のアプリ / 2026.10.01 撮影・一部抜粋`;
+      $('[data-shot-meta]', shotDialog).textContent = `${s.role}\u00a0/ 実際のアプリ\u00a0/ 2026.10.01 撮影・一部抜粋`;
       $('[data-shot-title]', shotDialog).textContent = s.name;
+      phraseBreak($('[data-shot-meta]', shotDialog));
+      phraseBreak($('[data-shot-title]', shotDialog));
       img.src = s.src; img.width = s.w; img.height = s.h;
       img.alt = `エスピクトスクール専用アプリの${s.name}。2026.10.01撮影の実画面から一部抜粋`;
       shotDialog.showModal();
@@ -503,7 +821,7 @@
     // cards are positioned relative to the rail (offsetParent), the same box that gets translated
     const centerOf = (el) => el.offsetLeft + el.offsetWidth / 2;
     const measure = () => {
-      pinned = mqDesktop.matches && motionOn() && innerHeight >= 560;
+      pinned = mqWideLayout.matches && motionOn() && innerHeight >= 560;
       section.classList.toggle('is-pinned', pinned);
       // the track is only a scroll container (worth focusing) in carousel mode
       if (pinned) track.removeAttribute('tabindex'); else track.tabIndex = 0;
@@ -523,17 +841,22 @@
       index = i;
       current.textContent = String(Math.min(i, jobs.length - 1) + 1).padStart(2, '0');
     };
+    // pinned rail: the first card whose left edge is inside the screen (the last card once the rail has ended)
+    const railGutter = () => parseFloat(getComputedStyle(rail).paddingLeft) || 0;
+    const firstVisible = (x) => {
+      const g = railGutter();
+      const i = jobs.findIndex((c) => c.offsetLeft - x >= g - 4);
+      return i < 0 ? jobs.length - 1 : i;
+    };
+    const railX = () => clamp(window.scrollY - top, 0, dist);
     const update = (y) => {
-      let p = 0; let viewCenter = 0;
+      let p = 0;
       if (pinned) {
         p = clamp((y - top) / (dist || 1), 0, 1);
         const x = p * dist;
         rail.style.transform = `translate3d(${-x.toFixed(1)}px, 0, 0)`;
-        viewCenter = x + innerWidth / 2;
-        let best = 0; let bestD = Infinity;
-        centers.forEach((c, i) => { const d = Math.abs(c - viewCenter); if (d < bestD) { bestD = d; best = i; } });
-        setIndex(p < 0.02 ? 0 : best);
-        setEdges(p <= 0.001, p >= 0.999);
+        setIndex(x >= dist - 2 ? jobs.length - 1 : firstVisible(x));
+        setEdges(x <= 1, x >= dist - 1);
       }
       bar.style.setProperty('--works-p', p.toFixed(4));
     };
@@ -552,15 +875,21 @@
       i = clamp(i, 0, items.length - 1);
       const el = items[i];
       const behavior = motionOn() ? 'smooth' : 'auto';
-      if (pinned) {
-        const x = clamp(centerOf(el) - innerWidth / 2, 0, dist);
-        window.scrollTo({ top: top + x, behavior });
-      } else {
-        track.scrollTo({ left: el.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft), behavior });
-      }
+      track.scrollTo({ left: el.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft), behavior });
     };
-    prevBtn.addEventListener('click', () => { if (prevBtn.getAttribute('aria-disabled') !== 'true') goTo(index - 1); });
-    nextBtn.addEventListener('click', () => { if (nextBtn.getAttribute('aria-disabled') !== 'true') goTo(index + 1); });
+    // pinned: align the next/previous card with the left edge (the head panel comes first)
+    const step = (dir) => {
+      const behavior = motionOn() ? 'smooth' : 'auto';
+      const x = railX();
+      const i = x >= dist - 2 ? jobs.length - 1 : firstVisible(x);
+      let target;
+      if (dir > 0) target = items[Math.min(i + 1, items.length - 1)].offsetLeft - railGutter();
+      else target = i <= 0 ? 0 : jobs[i - 1].offsetLeft - railGutter();
+      if (dir > 0 && target <= x + 2) target = x + (jobs[1].offsetLeft - jobs[0].offsetLeft);
+      window.scrollTo({ top: top + clamp(target, 0, dist), behavior });
+    };
+    prevBtn.addEventListener('click', () => { if (prevBtn.getAttribute('aria-disabled') === 'true') return; if (pinned) step(-1); else goTo(index - 1); });
+    nextBtn.addEventListener('click', () => { if (nextBtn.getAttribute('aria-disabled') === 'true') return; if (pinned) step(1); else goTo(index + 1); });
     track.addEventListener('scroll', onTrackScroll, { passive: true });
     // keyboard users: bring the focused card into view inside the pinned rail
     track.addEventListener('focusin', (e) => {
@@ -583,6 +912,8 @@
     const btns = $$('[data-role]');
     const status = $('[data-board-status]');
     const meter = $('[data-board-meter]');
+    const meterMini = $('[data-board-meter-mini]');
+    const peek = $('[data-board-peek]');
     const NAMES = { research: 'A 調べる・整理する', make: 'B つくる・整える', check: 'C 確かめる・仕上げる' };
     const state = { research: false, make: false, check: false };
     let timers = [];
@@ -595,11 +926,14 @@
       board.classList.toggle('is-empty', on.length === 0);
       board.classList.toggle('is-complete', on.length === 3);
       meter.style.transform = `scaleX(${on.length / 3})`;
+      if (meterMini) meterMini.style.transform = `scaleX(${on.length / 3})`;
+      if (peek) { peek.textContent = on.length === 3 ? '3つの役割がそろいました。下の制作ボードで完成形を確認できます' : on.length ? `制作ボードに反映中（${on.length}/3）` : '役割を選ぶと、下の制作ボードが組み上がります'; phraseBreak(peek); }
       let msg = '役割を選んでください。';
       if (on.length === 3) msg = '3つの役割がそろい、告知画像と投稿文が仕上がりました。';
-      else if (on.length) msg = `${on.map((k) => NAMES[k]).join('、')} を担当中。ほかの役割が加わると、制作が進みます。`;
+      else if (on.length) msg = `「${on.map((k) => NAMES[k]).join('」「')}」を担当中。ほかの役割が加わると、制作が進みます。`;
       status.setAttribute('aria-live', announce ? 'polite' : 'off');
       status.textContent = msg;
+      phraseBreak(status);
     };
     btns.forEach((b) => b.addEventListener('click', () => {
       clearTimers();
@@ -628,7 +962,7 @@
         autoPlayed = true; obs.disconnect();
         if (!Object.values(state).some(Boolean)) play(false);
       }
-    }, { threshold: 0.45 }).observe(board);
+    }, { threshold: 0.25 }).observe(board); // tall phone layouts never show 45% of the board at once
   }
 
   /* =========================================================
@@ -673,7 +1007,8 @@
       const dir = (q) => { const dx = q[0] - H[0]; const dy = q[1] - H[1]; const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l, l]; };
       const [ux, uy, dO] = dir(O); const [vx, vy, dK] = dir(K);
       const n = horizontal ? [0, 1] : [1, 0]; // outgoing arcs below (wide) / right (narrow)
-      const r = horizontal ? Math.min(210, Math.max(dO, dK) * 0.52) : Math.min(box.width * 0.37, 150);
+      // labels sit at the middle of each arc (≈ 0.75 r from the centre line); keep the pair inside the box
+      const r = horizontal ? Math.min(210, Math.max(dO, dK) * 0.52) : Math.min(box.width * 0.33, 150);
       const at = (p, d, s, t) => [p[0] + d[0] * s + n[0] * t, p[1] + d[1] * s + n[1] * t];
       const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
       const u = [ux, uy]; const v = [vx, vy];
@@ -825,7 +1160,7 @@
         const [x0, y0] = pts[i - 1]; const [x1, y1] = pts[i];
         let seg;
         if (vertical) { const my = (y0 + y1) / 2; seg = ` C ${x0} ${my}, ${x1} ${my}, ${x1} ${y1}`; }
-        else { const mx = (x0 + x1) / 2; seg = ` C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`; }
+        else { const top = Math.min(y0, y1) - 70; seg = ` C ${x0 + (x1 - x0) * 0.3} ${top}, ${x0 + (x1 - x0) * 0.7} ${top}, ${x1} ${y1}`; } // arc above the cards
         segs.push(seg);
       }
       svg.setAttribute('viewBox', `0 0 ${box.width.toFixed(0)} ${box.height.toFixed(0)}`);
@@ -854,11 +1189,39 @@
     measure();
   }
 
-  /* ---------- floating LINE button steps aside when the finale CTAs are on screen ---------- */
+  /* ---------- section labels: drop the separator bar when the Japanese part wraps to its own line ---------- */
+  const kickers = $$('.kicker').map((k) => ({ k, ja: $('.kicker__ja', k), first: k.firstElementChild })).filter((x) => x.ja && x.first && x.first !== x.ja);
+  const syncKickers = () => kickers.forEach(({ k, ja, first }) => {
+    k.classList.remove('is-stacked');
+    if (ja.offsetTop > first.offsetTop + first.offsetHeight / 2) k.classList.add('is-stacked');
+  });
+  onResizeFns.push(syncKickers);
+  syncKickers();
+  // labels can wrap or unwrap whenever fonts or line-break processing settle: re-check when their size changes
+  if ('ResizeObserver' in window) {
+    let kFrame = 0;
+    const kro = new ResizeObserver(() => { if (!kFrame) kFrame = requestAnimationFrame(() => { kFrame = 0; syncKickers(); }); });
+    kickers.forEach(({ k }) => kro.observe(k));
+  }
+
+  /* ---------- floating LINE button stays out of the way ----------
+     Hidden while the hero or the closing buttons are on screen (they already offer the same actions),
+     tucked away while scrolling down to read, and shown again when scrolling up. */
   const dock = $('[data-dock]');
-  const finaleCtas = $('.finale__ctas');
-  if (dock && finaleCtas) {
-    new IntersectionObserver(([e]) => dock.classList.toggle('is-quiet', e.isIntersecting), { threshold: 0.1 }).observe(finaleCtas);
+  if (dock) {
+    const visibleCtas = new Set();
+    const ctaIo = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) visibleCtas.add(e.target); else visibleCtas.delete(e.target); });
+      dock.classList.toggle('is-quiet', visibleCtas.size > 0);
+    }, { threshold: 0 });
+    $$('.hero, .finale__ctas').forEach((el) => ctaIo.observe(el));
+    let dockY = window.scrollY;
+    onScrollFns.push((y) => {
+      if (y > dockY + 6) dock.classList.add('is-tucked');
+      else if (y < dockY - 6) dock.classList.remove('is-tucked');
+      dockY = y;
+    });
+    dock.addEventListener('focusin', () => dock.classList.remove('is-tucked', 'is-quiet'));
   }
 
   /* =========================================================
