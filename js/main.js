@@ -105,7 +105,8 @@
     };
 
     // 2) short bracketed groups never break inside: （1分32秒）, 「できる」を (older Safari breaks right after 「 and （)
-    const BR = /[「『（(【][^「『（(【」』）)】]{1,14}[」』）)】][をがはにのともへで]?/g;
+    // (with the particle and the 、。 after it, so the group and its period never part: （今は努力義務）。)
+    const BR = /[「『（(【][^「『（(【」』）)】]{1,14}[」』）)】][をがはにのともへで]?[、。，．]?/g;
     // numbers with separators (20:00〜, 2026.10.01, ○/○) never break inside — WebKit treats the colon as a break point
     const NUM = /[0-9０-９○]+(?:[:：.．,，\/／][0-9０-９○]+)+[〜~]?/g;
     const groupNumbers = (block) => {
@@ -125,7 +126,42 @@
         t.replaceWith(frag);
       });
     };
+    // BudouX may split a short bracketed group into two phrases (（今は|努力義務）): join it again first, so it can be
+    // kept in one piece below (only short ones, up to 10 characters inside, so a joined group always fits its box)
+    const joinBrackets = (block) => {
+      let open = false; let len = 0; let marks = []; let changed = false;
+      scan(block).forEach((it) => {
+        if (it.mark) { if (open) { if (it.mark.tagName === 'BR') open = false; else marks.push(it.mark); } return; }
+        for (const ch of it.text.nodeValue) {
+          if (/[「『（(【]/.test(ch)) { open = true; len = 0; marks = []; continue; }
+          if (!open) continue;
+          if (/[」』）)】]/.test(ch)) { if (len <= 10 && marks.length) { marks.forEach((m) => m.remove()); changed = true; } open = false; continue; }
+          if (!/[\s​]/.test(ch) && ++len > 10) open = false;
+        }
+      });
+      if (changed) block.normalize();
+    };
+    // the opening bracket of a longer group stays with the word after it (WebKit may break right after 「 and （)
+    const OPEN_HEAD = /[「『（(【][^「『（(【」』）)】・\s​]{1,6}/g;
+    const holdOpeners = (block) => {
+      scan(block).forEach((it) => {
+        if (!it.text || it.text.parentElement.closest('.nb, .nw')) return;
+        OPEN_HEAD.lastIndex = 0;
+        if (!OPEN_HEAD.test(it.text.nodeValue)) return;
+        OPEN_HEAD.lastIndex = 0;
+        const t = it.text; const v = t.nodeValue; const frag = document.createDocumentFragment();
+        let last = 0; let m;
+        while ((m = OPEN_HEAD.exec(v))) {
+          if (m.index > last) frag.append(v.slice(last, m.index));
+          const span = document.createElement('span'); span.className = 'nb'; span.textContent = m[0];
+          frag.append(span); last = m.index + m[0].length;
+        }
+        if (last < v.length) frag.append(v.slice(last));
+        t.replaceWith(frag);
+      });
+    };
     const groupBrackets = (block) => {
+      joinBrackets(block);
       groupNumbers(block);
       scan(block).forEach((it) => {
         if (!it.text || it.text.parentElement.closest('.nb, .nw')) return;
@@ -285,7 +321,7 @@
       scan(block).forEach((it) => { if (it.mark) flush(it.mark); else run.push(it.text); });
       flush(null);
     };
-    const fixBlock = (block) => { prune(block); groupBrackets(block); hoist(block); glueLast(block); guardDots(block); };
+    const fixBlock = (block) => { prune(block); groupBrackets(block); holdOpeners(block); hoist(block); glueLast(block); guardDots(block); };
     $$('.bdx').forEach(fixBlock);
     // emergency points depend on the box width: (re)done when it changes. The work runs in the next frame,
     // outside the observer callback, and each block remembers the width it settled at — so our own changes
@@ -1000,8 +1036,9 @@
     const partEls = { research: $('.board__memo', board), make: $('.board__post', board), check: $('.board__check', board) };
     let build = null; // { announce, gap, last } while a build is running
     let autoState = 'waiting'; // first visit: waiting → done (taken over by the visitor, or built once)
-    let ticker = 0; let calmTimer = 0; let boardInView = false; let lastScroll = 0; let lastFast = 0; let tickY = scrollY; const trail = [];
-    // when the page last moved, and when it last moved fast (over 1px per ms: a link jump, a flick, a big step) –
+    let ticker = 0; let calmTimer = 0; let boardInView = false; let lastScroll = 0; let lastFast = 0; let lastFlick = 0; let tickY = scrollY; const trail = [];
+    // when the page last moved, and when it last moved fast (over 1px per ms: a link jump, a flick, a big step) or
+    // very fast (over 3px per ms: a link jump or a flick, but not a reader's wheel step or page-down) –
     // frame by frame, and across the last 0.15s so the slow start and end of such a move count too
     onScrollFns.push((y) => {
       const now = performance.now();
@@ -1009,7 +1046,9 @@
       trail.push([now, y]); while (trail.length > 2 && now - trail[1][0] > 150) trail.shift();
       const [t0, y0] = trail[0];
       const step = prev ? Math.abs(y - prev[1]) / Math.min(50, Math.max(8, now - prev[0])) : 0;
-      if (step > 1 || Math.abs(y - y0) / Math.max(50, Math.min(150, now - t0)) > 1) lastFast = now;
+      const avg = Math.abs(y - y0) / Math.max(50, Math.min(150, now - t0));
+      if (step > 1 || avg > 1) lastFast = now;
+      if (step > 3 || avg > 3) lastFlick = now;
       lastScroll = now;
       // look again as soon as a move has calmed down, rather than at the next round
       if (ticker) { clearTimeout(calmTimer); calmTimer = setTimeout(tick, 160); }
@@ -1023,10 +1062,13 @@
     const stopTicker = () => { clearInterval(ticker); ticker = 0; };
     const tick = () => {
       const now = performance.now();
-      // nothing starts or is added while the page is moving fast (also caught here, between frames)
+      // nothing starts while the page is moving fast (also caught here, between frames); a build that is already
+      // running carries on while the page moves at a reading pace (a wheel step, a page-down), so a reader who moves
+      // on right after a part still sees the board complete — only a flick or a jump holds it back
       if (Math.abs(scrollY - tickY) > 40) lastFast = now;
+      if (Math.abs(scrollY - tickY) > 150) lastFlick = now;
       tickY = scrollY;
-      if (now - lastFast < 150) return;
+      if (now - (build ? lastFlick : lastFast) < 150) return;
       if (!build) {
         if (autoState !== 'waiting') { stopTicker(); return; }
         // the first time the board is in view while the page is calm (not flying past), show the idea once;
