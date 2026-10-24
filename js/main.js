@@ -21,7 +21,7 @@
   let phraseBreak = () => {};
   if (typeof window.budouxJa === 'function') {
     const parser = window.budouxJa({ className: 'bdx', separator: document.createElement('wbr') });
-    const SKIP = '[data-split], .belt, .bg-word, .wordmark, .sr-only, .sticker, [aria-live], [data-stage-title], [data-stage-caption], .deals__range, .film__time, [data-count], script, style, svg';
+    const SKIP = '[data-split], .belt, .bg-word, .wordmark, .sr-only, .sticker, [aria-live], [data-stage-title], [data-stage-caption], .deals__range, .film__time, [data-count], [data-stats], script, style, svg';
     const JA = /[\u3040-\u30ff\u3400-\u9fff]/;
     const blockOf = (node) => {
       for (let a = node.parentElement; a; a = a.parentElement) {
@@ -77,6 +77,8 @@
     const PUNCT_ONLY = /[\s​、。，．,.」』）)】〉》！？!?…・「『（(【〈《\/／]/g;
     const script = (ch) => (KATA.test(ch) ? 'k' : KANJI.test(ch) ? 'c' : LATIN.test(ch) ? 'l' : '');
 
+    // words of this page that never break inside (app terms and set phrases)
+    const KEEP = ['できたチェック', '少しずつ', '届きました', '課題の提出'];
     const kanjiTail = (s) => (s.match(/[\u3400-\u9fff\u3005]+$/) || [''])[0].length;
     const kanjiHead = (s) => (s.match(/^[\u3400-\u9fff\u3005]+/) || [''])[0].length;
     // 1) remove poor break points
@@ -96,7 +98,8 @@
           (/(^|[^㐀-鿿])[㐀-鿿][りけきしいちみ]$/.test(before) && KANJI.test(b)) || // 取り|組み, 振り|返り
           (kanjiTail(before) && kanjiHead(after) && kanjiTail(before) + kanjiHead(after) <= 4) ||   // short kanji compounds: 質問|対応, 紹介|動画
           OPEN.test(a) ||                                            // right after an opening bracket
-          CLOSE.test(after);                                         // right before closing punctuation or a slash
+          CLOSE.test(after) ||                                       // right before closing punctuation or a slash
+          KEEP.some((w) => [...w].some((_, k) => k > 0 && before.endsWith(w.slice(0, k)) && after.startsWith(w.slice(k)))); // fixed terms
         if (remove) it.mark.remove();
       });
     };
@@ -1211,31 +1214,29 @@
   /* =========================================================
      COUNTERS
      ========================================================= */
-  const counters = $$('[data-count]');
-  if (counters.length) {
+  // count up once the numbers have been fully in view for a moment, not while the page jumps or flicks past them;
+  // if they leave the screen before the end, show the final value and count again the next time they are seen
+  const countWhenSeen = (box, nums) => {
     const ease = (t) => 1 - Math.pow(2, -10 * t);
-    const box = counters[0].parentElement;
-    const final = () => counters.forEach((el) => { el.textContent = el.dataset.count; });
-    let state = 'waiting'; let seenSince = 0; let poll = 0; let raf = 0;
+    const final = () => nums.forEach((el) => { el.textContent = el.dataset.count; });
+    let state = 'waiting'; let seenSince = 0; let poll = 0;
     const inView = () => {
       const r = box.getBoundingClientRect(); const hb = headerBottom();
       return r.height > 0 && Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, hb)) / r.height >= 0.9;
     };
+    const stopPoll = () => { clearInterval(poll); poll = 0; };
     const count = () => {
       state = 'counting';
       const start = performance.now(); const dur = 1400;
       const step = (now) => {
-        // left the screen before the end: show the final value now, and count again the next time it is seen
-        if (!inView()) { raf = 0; final(); state = 'waiting'; seenSince = 0; return; }
+        if (!inView()) { final(); state = 'waiting'; seenSince = 0; return; }
         const t = clamp((now - start) / dur, 0, 1);
-        counters.forEach((el) => { el.textContent = Math.round(parseInt(el.dataset.count, 10) * ease(t)); });
-        if (t < 1) raf = requestAnimationFrame(step); else { raf = 0; state = 'done'; stopPoll(); }
+        nums.forEach((el) => { el.textContent = Math.round(parseInt(el.dataset.count, 10) * ease(t)); });
+        if (t < 1) requestAnimationFrame(step); else { state = 'done'; stopPoll(); }
       };
-      counters.forEach((el) => { el.textContent = '0'; });
-      raf = requestAnimationFrame(step);
+      nums.forEach((el) => { el.textContent = '0'; });
+      requestAnimationFrame(step);
     };
-    const stopPoll = () => { clearInterval(poll); poll = 0; };
-    // count up once the numbers have been fully in view for a moment, not while the page jumps or flicks past them
     const check = () => {
       if (state !== 'waiting') return;
       if (!motionOn()) { final(); state = 'done'; stopPoll(); return; }
@@ -1247,6 +1248,60 @@
       if (e.isIntersecting && state !== 'done') { if (!poll) poll = setInterval(check, 80); }
       else if (!e.isIntersecting) { stopPoll(); seenSince = 0; }
     }).observe(box);
+  };
+  const dealNums = $$('.deals__range [data-count]');
+  if (dealNums.length) countWhenSeen(dealNums[0].parentElement, dealNums);
+
+  /* ---------- this month's numbers: from data/stats.json, only the figures it gives (nothing is made up) ---------- */
+  const statsEl = $('[data-stats]');
+  if (statsEl && 'fetch' in window) {
+    fetch('data/stats.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (!d || typeof d !== 'object') return;
+      const shown = $$('[data-stat]', statsEl).filter((el) => {
+        const v = d[el.dataset.stat];
+        const ok = typeof v === 'number' && Number.isFinite(v) && v >= 0;
+        el.hidden = !ok;
+        if (ok) { const num = $('[data-stat-num]', el); num.dataset.count = String(Math.round(v)); num.textContent = num.dataset.count; }
+        return ok;
+      });
+      if (!shown.length) return;
+      const label = $('[data-stats-label]', statsEl);
+      if (typeof d.label === 'string' && d.label.trim()) label.textContent = d.label.trim();
+      const note = $('[data-stats-note]', statsEl);
+      if (typeof d.note === 'string' && d.note.trim()) { note.textContent = d.note.trim(); note.hidden = false; }
+      statsEl.hidden = false;
+      phraseBreak(label); if (!note.hidden) phraseBreak(note);
+      runResize();
+      countWhenSeen($('.stats__list', statsEl), shown.map((el) => $('[data-stat-num]', el)));
+    }).catch(() => { /* no file (e.g. opened from disk): the block stays hidden */ });
+  }
+
+  /* =========================================================
+     SENT: the checks, the 「届きました」 and the notifications pop as each one passes the reading line
+     (a little below the middle of the screen), so every one of them pops where it can be seen
+     ========================================================= */
+  const sentEl = $('[data-sent]');
+  if (sentEl) {
+    const steps = $$('[data-sent-step]', sentEl);
+    const banner = $('.phone__sent', sentEl);
+    let ys = [];
+    // page position of an element, without the pop-in offset (offsetTop ignores transforms and translate)
+    const docTop = (el) => { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y; };
+    const measure = () => {
+      // beside the phone (wide layouts): the notifications start at the 「届きました」, so they pop after it
+      const cs = getComputedStyle(sentEl);
+      const side = cs.display === 'block' || cs.gridTemplateColumns.split(' ').length > 1;
+      const bannerBottom = docTop(banner) - docTop(sentEl) + banner.offsetHeight;
+      sentEl.style.setProperty('--toasts-top', side ? `${Math.round(bannerBottom + (cs.display === 'block' ? 0 : 12))}px` : '0px');
+      ys = steps.map((s) => docTop(s) + s.offsetHeight / 2);
+    };
+    onResizeFns.push(measure);
+    measure();
+    onScrollFns.push((y, vh) => {
+      const all = !motionOn();
+      const line = y + headerH() + (vh - headerH()) * 0.6;
+      steps.forEach((s, i) => s.classList.toggle('is-on', all || ys[i] <= line));
+    });
   }
 
   /* =========================================================

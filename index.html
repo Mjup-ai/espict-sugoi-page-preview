@@ -62,6 +62,10 @@
     <symbol id="i-tap" viewBox="0 0 24 24"><path d="M9.5 11.5V5a1.75 1.75 0 0 1 3.5 0v5.5M13 10.5V9a1.75 1.75 0 0 1 3.5 0v2M16.5 10.5a1.75 1.75 0 0 1 3.5 0v3.5a7 7 0 0 1-7 7h-1.2a6 6 0 0 1-4.6-2.2L4 15.5a1.6 1.6 0 0 1 2.4-2.1l3.1 2.6"/><path d="M5.5 5.5 4 4M14.5 3.2 15.6 1.8M4 9.5H2.2"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></symbol>
     <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14.5 3.5h6v6M9.5 20.5h-6v-6M20.5 3.5l-7 7M3.5 20.5l7-7"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-staff" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><circle cx="12" cy="10" r="2.8"/><path d="M7.5 17.5a4.5 4.5 0 0 1 9 0M9.5 3.5v2h5v-2"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></symbol>
     <symbol id="i-line" viewBox="0 0 24 24"><path d="M12 3.5c-5.2 0-9.5 3.4-9.5 7.6 0 3.8 3.4 6.9 8 7.5l-.6 2.4c-.1.4.3.7.7.5 3.3-1.9 10.9-6.1 10.9-10.4 0-4.2-4.3-7.6-9.5-7.6z" fill="currentColor" stroke="none"/></symbol>
   </svg>
 
@@ -160,6 +164,12 @@
               <span class="btn__play" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>1分半でわかる紹介動画
             </a>
           </div>
+          <!-- 本物の利用者さんの声。掲載の許可が出たら data-voice-real="off" を "on" に変える（README「本物の声」） -->
+          <figure class="voice-real" data-voice-real="off">
+            <span class="voice-real__label"><svg class="icon" aria-hidden="true"><use href="#i-person"/></svg>利用者さんの声</span>
+            <blockquote class="voice-real__text"><p><span class="nw">楽しくて、</span><span class="nw">やりがいがあった</span></p></blockquote>
+            <figcaption class="voice-real__who">Web制作を体験した利用者さん</figcaption>
+          </figure>
         </div>
 
         <div class="hero__visual">
@@ -209,6 +219,10 @@
     <!-- ============ ABOUT ============ -->
     <section class="section about" id="about" aria-labelledby="about-title">
       <p class="bg-word" aria-hidden="true" data-drift>ABOUT</p>
+      <div class="voices">
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>できることが、少しずつ増えてきた</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>作業の選択肢が、ひとつ増えた</p></blockquote><figcaption class="voice__who">管理者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container">
         <header class="sec-head" data-reveal>
           <p class="kicker"><span class="kicker__no">01</span><span class="kicker__en">ABOUT</span><span class="kicker__ja">エスピクトスクールとは</span></p>
@@ -272,6 +286,10 @@
     <!-- ============ CASES ============ -->
     <section class="section cases" id="cases" aria-labelledby="cases-title">
       <p class="bg-word" aria-hidden="true" data-drift>CASE</p>
+      <div class="voices">
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>教える準備に、追われなくなった</p></blockquote><figcaption class="voice__who">職員さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>家からでも、授業に参加できる</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container">
         <header class="sec-head sec-head--center" data-reveal>
           <p class="kicker"><span class="kicker__no">02</span><span class="kicker__en">CASE</span><span class="kicker__ja">事業所での活用イメージ</span></p>
@@ -411,6 +429,10 @@
     <!-- ============ APP / LEARNING ============ -->
     <section class="section app" id="learning" aria-labelledby="app-title">
       <p class="bg-word" aria-hidden="true" data-drift>APP</p>
+      <div class="voices">
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>わからない所は、ぴくとにすぐ聞ける</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>一人ひとりの進み具合が分かる</p></blockquote><figcaption class="voice__who">職員さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container">
         <header class="sec-head sec-head--center" data-reveal>
           <p class="kicker"><span class="kicker__no">03</span><span class="kicker__en">APP</span><span class="kicker__ja">エスピクトスクール専用アプリ</span></p>
@@ -510,6 +532,90 @@
               </ol>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SENT: 提出の瞬間と、残る記録 ============ -->
+    <section class="section sent" id="sent" aria-labelledby="sent-title">
+      <p class="bg-word" aria-hidden="true" data-drift>SENT</p>
+      <div class="voices">
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>「届きました」が出ると、ほっとする</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>提出が記録に残るので、確かめやすい</p></blockquote><figcaption class="voice__who">職員さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
+      <div class="container">
+        <header class="sec-head sec-head--center" data-reveal>
+          <p class="kicker"><span class="kicker__en">SUBMIT</span><span class="kicker__ja">提出の瞬間と、残る記録</span></p>
+          <h2 class="sec-title" id="sent-title">「できた」が、<br><em>ちゃんと届く。</em></h2>
+          <p class="sec-lead">アプリから出すと、緑の「届きました」。<br>できたチェックがそろった取り組みが、記録に残ります。</p>
+        </header>
+
+        <div class="sent-stage" data-sent>
+          <figure class="sent-phone">
+            <div class="phone" aria-hidden="true">
+              <div class="phone__bar"><span class="phone__back"><svg class="icon"><use href="#i-left"/></svg></span><img src="assets/img/logo.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><b>エスピクトスクール</b></div>
+              <div class="phone__task">
+                <p class="phone__chips"><span>本番</span><span>Web制作</span></p>
+                <p class="phone__title">お店のお知らせ記事を1本書く（見本）</p>
+              </div>
+              <div class="phone__checks">
+                <p class="phone__checks-title"><svg class="icon"><use href="#i-clip"/></svg><span>出す前に確かめよう<span class="nw">（できたチェック 3つ）</span></span></p>
+                <ol>
+                  <li class="phone__check" data-sent-step><i></i>見出しが3つある</li>
+                  <li class="phone__check" data-sent-step><i></i>写真が1枚入っている</li>
+                  <li class="phone__check" data-sent-step><i></i>誤字がない</li>
+                </ol>
+              </div>
+              <div class="phone__msg">
+                <p class="phone__who"><span class="phone__avatar"><svg class="icon"><use href="#i-person"/></svg></span><b>あなた</b><small>○/○ 11:18</small></p>
+                <p class="phone__url">作ったページ：<span>https://example.com/mihon</span></p>
+                <p class="phone__sent" data-sent-step><svg class="icon"><use href="#i-check-circle"/></svg><b>届きました</b><span>これで提出できています</span></p>
+              </div>
+            </div>
+            <p class="sr-only">提出画面の見本。できたチェック3つ（見出しが3つある・写真が1枚入っている・誤字がない）がすべてそろい、緑の「届きました　これで提出できています」が表示されます。</p>
+            <figcaption>アプリの画面と通知を再現した見本です（架空のデータ）</figcaption>
+          </figure>
+          <ul class="sent-toasts" aria-label="「届きました」の通知の見本（架空のデータ）">
+            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>アイキャッチ画像を作る</span></span></li>
+            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>動画に字幕を入れる</span></span></li>
+            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>アンケート結果を表にまとめる</span></span></li>
+            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>商品の紹介文を書く</span></span></li>
+          </ul>
+        </div>
+
+        <!-- 今月の数字。data/stats.json に数字が入っている項目だけ表示（README「今月の数字」） -->
+        <div class="stats" data-stats hidden>
+          <p class="stats__title" data-stats-label>今月の取り組み</p>
+          <dl class="stats__list">
+            <div class="stat" data-stat="submissions" hidden><dt>届いた成果物</dt><dd><b data-stat-num>0</b><small>件</small></dd></div>
+            <div class="stat" data-stat="lessons" hidden><dt>授業</dt><dd><b data-stat-num>0</b><small>回</small></dd></div>
+            <div class="stat" data-stat="deliveries" hidden><dt>納品</dt><dd><b data-stat-num>0</b><small>件</small></dd></div>
+          </dl>
+          <p class="stats__note" data-stats-note hidden></p>
+        </div>
+
+        <div class="record" data-reveal>
+          <div class="record__copy">
+            <p class="record__kicker"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>届いたあとも</p>
+            <h3 class="record__title">取り組みが、<br><em>記録として残る。</em></h3>
+            <p>いつ、何に取り組み、何を出し、誰が確かめたか。日々の取り組みを、あとから確かめられる形で残します。</p>
+            <p class="note">記録は日々の振り返りの材料です。福祉サービスとしての支援・記録は事業所で行います。</p>
+          </div>
+          <figure class="record__figure">
+            <div class="sheet">
+              <div class="sheet__head"><b>取り組みの記録</b><span class="record__badge">記録の見本（架空）</span></div>
+              <dl class="sheet__rows">
+                <div><dt>利用者</dt><dd><span class="blur" aria-hidden="true">見本 一郎</span><span class="sr-only">氏名（ぼかし）</span></dd></div>
+                <div><dt>日付</dt><dd>○月○日（○）</dd></div>
+                <div><dt>時間</dt><dd>10:05〜11:20</dd></div>
+                <div><dt>内容</dt><dd>アイキャッチ制作</dd></div>
+                <div><dt>成果物</dt><dd><span class="sheet__link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg><span class="blur" aria-hidden="true">example.com/mihon</span><span class="sr-only">リンク（ぼかし）</span></span></dd></div>
+                <div><dt>チェック</dt><dd><span class="sheet__checks" aria-hidden="true"><i></i><i></i><i></i></span>できたチェック 3つ</dd></div>
+                <div><dt>確認者</dt><dd><span class="blur" aria-hidden="true">見本 花子</span><span class="sr-only">氏名（ぼかし）</span><span class="sheet__ok">確認済み</span></dd></div>
+              </dl>
+            </div>
+            <figcaption>架空のデータで作った見本です。氏名とリンクはぼかしています。</figcaption>
+          </figure>
         </div>
       </div>
     </section>
@@ -622,11 +728,36 @@
         </div>
       </div>
       <p class="works__note">画像は仕事内容を伝えるための制作イメージです。登場する商品・イベントは架空の題材で、実績や販売品ではありません。案件の内容・募集状況・参加条件は個別にご案内します。</p>
+      <!-- 作品の壁。いまは制作イメージ。本物の納品物に差し替えたら、その li に data-delivered を付ける（README「作品の壁」） -->
+      <div class="wall">
+        <div class="container">
+          <div class="voices voices--wall">
+            <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>作ったものが使われるのが、うれしい</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+          </div>
+          <header class="wall__head" data-reveal>
+            <p class="kicker kicker--dark"><span class="kicker__en">GALLERY</span><span class="kicker__ja">作品の壁</span></p>
+            <h3 class="wall__heading">つくったものが、<br><em>誰かのもとへ。</em></h3>
+            <p class="wall__lead">利用者の方が作り、依頼主に届けた作品を並べる場所です。いまは制作イメージを並べています。</p>
+          </header>
+          <ul class="wall__grid">
+          <li class="wall__item" data-reveal><figure><div class="wall__media"><img src="assets/img/case-video.webp" alt="じゃっぷちゃんの素材に字幕を付けた縦動画の制作イメージ" width="1448" height="1086" loading="lazy" decoding="async" style="object-position: 18% 40%"></div><figcaption><span class="wall__cat">動画編集</span><b class="wall__title">縦型の紹介動画</b><span class="wall__tag">制作イメージ</span><span class="wall__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>依頼主に納品済み</span></figcaption></figure></li>
+          <li class="wall__item" data-reveal><figure><div class="wall__media"><img src="assets/img/work-social.webp" alt="スマートフォンに並んだ投稿画像の制作イメージ" width="1536" height="1152" loading="lazy" decoding="async" style="object-position: 30% 45%"></div><figcaption><span class="wall__cat">SNS運用</span><b class="wall__title">SNS投稿画像</b><span class="wall__tag">制作イメージ</span><span class="wall__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>依頼主に納品済み</span></figcaption></figure></li>
+          <li class="wall__item" data-reveal><figure><div class="wall__media"><img src="assets/img/work-design.webp" alt="ポスターと紙面レイアウトの制作イメージ" width="1536" height="1152" loading="lazy" decoding="async" style="object-position: 20% 30%"></div><figcaption><span class="wall__cat">画像デザイン</span><b class="wall__title">お店のチラシ</b><span class="wall__tag">制作イメージ</span><span class="wall__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>依頼主に納品済み</span></figcaption></figure></li>
+          <li class="wall__item" data-reveal><figure><div class="wall__media"><img src="assets/img/work-commerce.webp" alt="撮影ブースで撮った商品写真の制作イメージ" width="1536" height="1152" loading="lazy" decoding="async" style="object-position: 55% 45%"></div><figcaption><span class="wall__cat">商品PR</span><b class="wall__title">商品の撮影・補正</b><span class="wall__tag">制作イメージ</span><span class="wall__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>依頼主に納品済み</span></figcaption></figure></li>
+          <li class="wall__item" data-reveal><figure><div class="wall__media"><img src="assets/img/work-creator.webp" alt="2Dキャラクターと配信素材の制作イメージ" width="1536" height="1152" loading="lazy" decoding="async" style="object-position: 70% 35%"></div><figcaption><span class="wall__cat">イラスト</span><b class="wall__title">キャラクターのイラスト</b><span class="wall__tag">制作イメージ</span><span class="wall__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>依頼主に納品済み</span></figcaption></figure></li>
+          <li class="wall__item" data-reveal><figure><div class="wall__media"><img src="assets/img/work-research.webp" alt="出典を確かめて整理したまとめ資料の制作イメージ" width="1536" height="1152" loading="lazy" decoding="async" style="object-position: 75% 50%"></div><figcaption><span class="wall__cat">情報整理</span><b class="wall__title">調べた情報のまとめ資料</b><span class="wall__tag">制作イメージ</span><span class="wall__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>依頼主に納品済み</span></figcaption></figure></li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <!-- ============ ROLES ============ -->
     <section class="section roles" id="roles" aria-labelledby="roles-title">
       <p class="bg-word" aria-hidden="true" data-drift>ROLES</p>
+      <div class="voices">
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>得意なことを、任せてもらえた</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>得意に合わせて、担当を決められる</p></blockquote><figcaption class="voice__who">職員さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container roles__grid">
         <header class="sec-head roles__head" data-reveal>
           <p class="kicker"><span class="kicker__no">05</span><span class="kicker__en">ROLES</span><span class="kicker__ja">取り組み方の例 / 配信告知の制作</span></p>
@@ -722,6 +853,10 @@
     <!-- ============ SCHEME ============ -->
     <section class="section scheme" id="support" aria-labelledby="scheme-title">
       <p class="bg-word" aria-hidden="true" data-drift>SCHEME</p>
+      <div class="voices">
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>案件探しを任せられて、助かる</p></blockquote><figcaption class="voice__who">管理者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>本物の仕事に、挑戦できる</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container">
         <header class="sec-head sec-head--center" data-reveal>
           <p class="kicker"><span class="kicker__no">06</span><span class="kicker__en">SCHEME</span><span class="kicker__ja">事業所と企業を、学びと仕事でつなぐ</span></p>
@@ -849,6 +984,10 @@
 
     <!-- ============ FLOW ============ -->
     <section class="flow" id="projects" aria-labelledby="flow-title">
+      <div class="voices">
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>確認や記録を任せて、声かけに集中できる</p></blockquote><figcaption class="voice__who">職員さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>できたチェックで、出す前に確かめられる</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container">
         <header class="sec-head" data-reveal>
           <p class="kicker kicker--on-cyan"><span class="kicker__no">07</span><span class="kicker__en">FLOW</span><span class="kicker__ja">実案件の進め方</span></p>
@@ -894,6 +1033,25 @@
           <figcaption>説明用の制作例です。実際の案件・アプリ画面ではありません。</figcaption>
         </figure>
 
+        <div class="share" data-reveal>
+          <div class="share__copy">
+            <h3 class="share__title">案件探しから記録まで、<br><em>エスピクトが担当。</em></h3>
+            <p>事業所の方には、日々の声かけと見守りをお願いしています。</p>
+          </div>
+          <table class="share__table">
+            <caption class="sr-only">事業所とエスピクトスクールの分担</caption>
+            <thead>
+              <tr><th scope="col">項目</th><th scope="col">事業所がやること</th><th scope="col">エスピクトスクールがやること</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>案件探し</th><td data-who="事業所がやること">取り組みたい分野と、体制を伝える</td><td data-who="エスピクトスクールがやること">案件を探し、条件を確かめてご案内</td></tr>
+              <tr><th scope="row"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg>指示書</th><td data-who="事業所がやること">おまかせ</td><td data-who="エスピクトスクールがやること">作業の指示書と、できたチェックを用意</td></tr>
+              <tr><th scope="row"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>確認</th><td data-who="事業所がやること">日々の声かけ、体調や活動ペースの確認</td><td data-who="エスピクトスクールがやること">成果物の品質確認と、依頼元への納品</td></tr>
+              <tr><th scope="row"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>記録</th><td data-who="事業所がやること">福祉サービスとしての支援の記録</td><td data-who="エスピクトスクールがやること">出席・取り組み時間・提出をアプリに記録</td></tr>
+            </tbody>
+          </table>
+        </div>
+
         <div class="flow__terms" data-reveal>
           <p class="flow__terms-title"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>受注は、条件を確認してから</p>
           <p>担当範囲・納期・報酬・変更時の連絡方法を、事業所と確認します。</p>
@@ -905,6 +1063,10 @@
     <!-- ============ START ============ -->
     <section class="section start" id="start" aria-labelledby="start-title">
       <p class="bg-word" aria-hidden="true" data-drift>START</p>
+      <div class="voices">
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>体験してから決められて、安心だった</p></blockquote><figcaption class="voice__who">管理者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+        <figure class="voice voice--user" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-person"/></svg></span><blockquote class="voice__text"><p>次は、動画編集にも挑戦したい</p></blockquote><figcaption class="voice__who">利用者さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container">
         <header class="sec-head sec-head--center" data-reveal>
           <p class="kicker"><span class="kicker__no">08</span><span class="kicker__en">START</span><span class="kicker__ja">導入までの流れ</span></p>
@@ -961,6 +1123,9 @@
     <!-- ============ FAQ ============ -->
     <section class="section faq" id="faq" aria-labelledby="faq-title">
       <p class="bg-word" aria-hidden="true" data-drift>Q&amp;A</p>
+      <div class="voices">
+        <figure class="voice voice--staff" data-reveal><span class="voice__face" aria-hidden="true"><svg class="icon"><use href="#i-staff"/></svg></span><blockquote class="voice__text"><p>専門知識がなくても、始められた</p></blockquote><figcaption class="voice__who">職員さん<span class="voice__tag">イメージ</span></figcaption></figure>
+      </div>
       <div class="container faq__grid">
         <header class="sec-head" data-reveal>
           <p class="kicker"><span class="kicker__no">09</span><span class="kicker__en">Q&amp;A</span><span class="kicker__ja">よくあるご質問</span></p>
