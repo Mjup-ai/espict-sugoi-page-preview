@@ -845,8 +845,9 @@ html.js:not([data-motion="off"]) .eq-op.is-in { animation: spinIn .9s var(--ease
   display: grid; grid-template-columns: .92fr auto 1.38fr; gap: clamp(16px, 2.4vw, 32px); align-items: stretch;
 }
 .case-panel:focus-visible { outline-offset: 8px; border-radius: var(--radius); }
-.case-panel.is-entering .case-before { animation: slideFromLeft .7s var(--ease-out) both; }
-.case-panel.is-entering .case-after { animation: slideFromRight .8s .08s var(--ease-out) both; }
+.case-before.is-entering { animation: slideFromLeft .7s var(--ease-out) both; }
+.case-after.is-entering { animation: slideFromRight .8s .08s var(--ease-out) both; }
+html:not([data-motion="off"]) .case-before.is-pending, html:not([data-motion="off"]) .case-after.is-pending { opacity: 0; }
 @keyframes slideFromLeft { from { opacity: 0; transform: translateX(-40px); } }
 @keyframes slideFromRight { from { opacity: 0; transform: translateX(40px); } }
 .case-before {
@@ -951,7 +952,7 @@ html.js:not([data-motion="off"]) .eq-op.is-in { animation: spinIn .9s var(--ease
 .real-btn .icon { width: 18px; height: 18px; }
 
 .story { display: grid; grid-template-columns: .92fr 1.08fr; gap: clamp(32px, 5vw, 80px); }
-.story__chapters { display: flex; flex-direction: column; }
+.story__chapters { display: flex; flex-direction: column; padding: var(--story-head, 0px) 0 var(--story-tail, 0px); }
 .chapter {
   display: flex; flex-direction: column; gap: 18px; align-items: flex-start;
   padding: min(12vh, 120px) 0;
@@ -993,7 +994,7 @@ html.js:not([data-motion="off"]) .eq-op.is-in { animation: spinIn .9s var(--ease
 @media (min-width: 1000px) {
   .chapter__caption { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 }
-.story__sticky { position: sticky; top: calc(var(--header-h) + 5vh); padding-bottom: 4vh; }
+.story__sticky { position: sticky; top: calc(var(--header-h) + 5vh); }
 .device {
   overflow: hidden; border-radius: 24px; border: 3px solid var(--ink); background: #fff;
   box-shadow: 14px 14px 0 var(--ink);
@@ -1348,7 +1349,7 @@ html.js:not([data-motion="off"]) .eq-op.is-in { animation: spinIn .9s var(--ease
   opacity: 0; transform: scale(2.2) rotate(-24deg); pointer-events: none;
   transition: opacity .2s, transform .2s;
 }
-.board.is-complete .board__check .board__stamp { opacity: 1; transform: rotate(-12deg); transition: opacity .2s 1.6s, transform .45s 1.6s cubic-bezier(.2, 1.6, .5, 1); }
+.board.is-complete .board__check .board__stamp { opacity: 1; transform: rotate(-12deg); transition: opacity .2s var(--stamp-delay, 1.5s), transform .45s var(--stamp-delay, 1.5s) cubic-bezier(.2, 1.6, .5, 1); }
 /* narrow board (tablet column, small laptops, phones): stack the three parts */
 @container board (max-width: 560px) {
   .board__body { grid-template-columns: 1fr; grid-template-areas: "memo" "post" "check"; min-height: 0; padding: 14px; }
@@ -1607,36 +1608,56 @@ html.js:not([data-motion="off"]) .eq-op.is-in { animation: spinIn .9s var(--ease
    START
    ========================================================= */
 .start { background: #fff; padding-top: clamp(150px, 16vw, 230px); }
-.stages { position: relative; }
+/* wide screens: the cards zigzag around a central line; the line runs down the middle and the character walks
+   along it at the reading height (half way down the screen), so it stays in view while it moves */
+.stages { position: relative; --spine-gap: 128px; }
 .stages__path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .stages__path path { fill: none; stroke-linecap: round; }
 .stages__path-base { stroke: #cfe3ec; stroke-width: 6; stroke-dasharray: 2 14; }
 .stages__path-fill { stroke: var(--cyan); stroke-width: 6; }
 .stages__avatar {
-  position: absolute; left: 0; top: 0; z-index: 3; width: 74px; height: 74px; pointer-events: none;
+  position: absolute; left: 0; top: 0; z-index: 3; width: 64px; height: 64px; pointer-events: none;
   border-radius: 50%; overflow: hidden; background: var(--yellow); border: 3px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
   will-change: transform;
 }
 .stages__avatar img { width: 120%; max-width: none; margin: 4px 0 0 -10%; }
-.stages__list { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; align-items: start; }
+html:not(.js) .stages__avatar { display: none; } /* placed by the script */
+/* the character appears together with the first card instead of floating alone before the cards come in */
+@supports selector(:has(*)) {
+  html.js:not([data-motion="off"]) .stages__avatar { opacity: 0; transition: opacity .4s; }
+  html.js .stages:has(.stage.is-in) .stages__avatar { opacity: 1; }
+}
+.stages__list { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; }
 .stage {
-  position: relative; display: flex; flex-direction: column; gap: 10px;
-  padding: 50px 22px 26px; border-radius: var(--radius); background: #fff; border: var(--border);
+  position: relative; width: calc(50% - var(--spine-gap) / 2);
+  display: grid; grid-template-columns: minmax(0, 40%) 1fr; column-gap: 22px; row-gap: 6px; align-content: start;
+  padding: 24px; border-radius: var(--radius); background: #fff; border: var(--border);
   box-shadow: 6px 6px 0 var(--ink);
   transition: box-shadow .4s, transform .4s var(--ease-out);
 }
-.stage:nth-child(even) { margin-top: 90px; }
+/* each card rises next to the previous one (the overlap is fitted to the card heights by the script) */
+.stage + .stage { margin-top: calc(-1 * var(--stage-overlap, 110px)); }
+.stage:nth-child(even) { align-self: flex-end; }
+/* a short bar joins each card to its pin on the central line */
+.stage::before {
+  content: ""; position: absolute; top: 38px; left: 100%; width: calc(var(--spine-gap) / 2 - 16px); height: 4px;
+  background: repeating-linear-gradient(90deg, #cfe3ec 0 6px, transparent 6px 12px);
+  transition: background .4s;
+}
+.stage:nth-child(even)::before { left: auto; right: 100%; }
+.stage.is-reached::before { background: var(--cyan); }
 .stage__pin {
-  position: absolute; left: 50%; top: -18px; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%;
+  position: absolute; left: calc(100% + var(--spine-gap) / 2 - 18px); top: 22px; width: 36px; height: 36px; border-radius: 50%;
   background: #fff; border: 3px solid var(--ink);
   transition: background-color .4s, transform .5s var(--ease-spring);
 }
+.stage:nth-child(even) .stage__pin { left: calc(-1 * var(--spine-gap) / 2 - 18px); }
 .stage.is-reached .stage__pin { background: var(--cyan); transform: scale(1.15); }
 .stage.is-reached { box-shadow: 8px 8px 0 var(--cyan); }
-.stage__media { overflow: hidden; border-radius: 14px; border: 2px solid var(--line); background: var(--paper); }
+.stage__media { grid-row: 1 / span 6; align-self: start; overflow: hidden; border-radius: 14px; border: 2px solid var(--line); background: var(--paper); }
 .stage__media img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
-.stage__no { font-family: var(--font-display); font-size: 14px; color: var(--cyan-text); letter-spacing: .08em; margin-top: 6px; }
+.stage__no { font-family: var(--font-display); font-size: 14px; color: var(--cyan-text); letter-spacing: .08em; }
 .stage__title { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 900; line-height: 1.3; }
 .stage__title .icon { width: 26px; height: 26px; color: var(--cyan-text); }
 .stage__sub { font-size: 14.5px; font-weight: 900; color: var(--pink-text); }
@@ -1781,11 +1802,12 @@ html[data-motion="off"] .qa::details-content { transition: none; }
   .scheme-illust { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; }
   .faq__grid { grid-template-columns: 1fr; }
   .faq .sec-head { position: static; }
-  .stages__list { grid-template-columns: 1fr; gap: 28px; padding-left: 64px; }
-  .stage:nth-child(even) { margin-top: 0; }
-  .stage { display: grid; grid-template-columns: minmax(220px, 40%) 1fr; column-gap: 28px; row-gap: 6px; align-content: start; padding: 26px; }
-  .stage__media { grid-row: 1 / span 6; align-self: start; }
-  .stage__pin { left: -50px; top: 44px; margin-left: 0; width: 30px; height: 30px; }
+  .stages__list { display: grid; grid-template-columns: 1fr; gap: 28px; padding-left: 64px; }
+  .stage, .stage:nth-child(even) { width: auto; align-self: auto; }
+  .stage + .stage { margin-top: 0; }
+  .stage::before { display: none; }
+  .stage { grid-template-columns: minmax(220px, 40%) 1fr; column-gap: 28px; padding: 26px; }
+  .stage__pin, .stage:nth-child(even) .stage__pin { left: -50px; top: 44px; width: 30px; height: 30px; }
   .stages__avatar { width: 50px; height: 50px; }
 }
 @keyframes dashDown { to { background-position: 0 18px; } }
@@ -1888,9 +1910,10 @@ html[data-motion="off"] .qa::details-content { transition: none; }
   .flow__terms { grid-template-columns: 1fr; }
 
   .stages__list { gap: 34px; padding-left: 52px; }
-  .stage { display: flex; padding: 26px 20px 22px; }
+  .stage { display: flex; flex-direction: column; gap: 10px; padding: 26px 20px 22px; }
+  .stage__no { margin-top: 6px; }
   .stage__media { align-self: stretch; } /* undo the tablet grid's start alignment, which collapsed unloaded images to 0px */
-  .stage__pin { left: -48px; top: 34px; width: 28px; height: 28px; }
+  .stage__pin, .stage:nth-child(even) .stage__pin { left: -48px; top: 34px; width: 28px; height: 28px; }
   .stages__avatar { width: 42px; height: 42px; }
 
   .faq__list { gap: 12px; }
@@ -2011,6 +2034,25 @@ html[data-motion="off"] .tl__head-line { left: 62%; }
 @media (max-width: 389px) {
   .loop__label { font-size: 11.5px; padding: 3px 9px 3px 6px; gap: 4px; }
   .loop__label .icon { width: 14px; height: 14px; }
+}
+/* phones and tablets: the whole loop fits on the screen below the header, so the flow can be followed all the way round */
+@media (max-width: 999px) {
+  .loop__nodes { row-gap: clamp(76px, (100vh - var(--header-h) - 465px) / 2, 168px); row-gap: clamp(76px, (100svh - var(--header-h) - 465px) / 2, 168px); }
+}
+@media (max-width: 999px) and (max-height: 700px) {
+  .loop__nodes { padding: 6px 0; row-gap: clamp(70px, (100vh - var(--header-h) - 375px) / 2, 168px); row-gap: clamp(70px, (100svh - var(--header-h) - 375px) / 2, 168px); }
+  .loop__node, .loop__node--hub { padding: 10px 12px; gap: 2px; }
+  .loop__node .node__icon { width: 36px; height: 36px; }
+  .loop__node .node__icon .icon { width: 18px; height: 18px; }
+  .loop__node--hub .node__logo { width: 46px; height: 46px; }
+  .loop__node--hub .node__logo img { width: 38px; height: 38px; }
+  .loop__node h3 { margin-top: 2px; font-size: 16px; }
+}
+/* landscape phones: the three side by side, as on wide screens, in a box as tall as the screen allows */
+@media (max-width: 999px) and (max-height: 520px) and (orientation: landscape) {
+  .loop__nodes { grid-template-columns: repeat(3, 1fr); grid-template-rows: none; row-gap: 0; padding: 0; min-height: calc(100vh - var(--header-h) - 36px); min-height: calc(100svh - var(--header-h) - 36px); }
+  .loop__node { width: min(100%, 200px); }
+  .loop__node--hub { width: min(100%, 226px); }
 }
 
 /* narrowest phones (320–374px) */
@@ -2159,5 +2201,3 @@ html[data-motion="off"] .tl__head-line { left: 62%; }
   .works.is-pinned .job__title { font-size: 26px; }
   .works.is-pinned .job__desc { font-size: 15px; }
 }
-/* START: room above the cards for the marker's arc */
-@media (min-width: 1100px) { .stages { padding-top: 44px; } }

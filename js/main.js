@@ -257,19 +257,30 @@
 
     // 4b) browsers always allow a break after 「・」 (even with keep-all): keep phrases like 企業・商品の together
     //     with a no-wrap span; 5) opens it again (class .open) only when the phrase is wider than its box
+    const TERMS = ['課題の提出'];
     const guardDots = (block) => {
       let run = [];
-      const flush = () => {
+      const flush = (mark) => {
         const str = run.map((t) => t.nodeValue).join('');
         const parent = run.length && run[0].parentElement;
         if (/・(?!\s*$)/.test(str) && run.every((t) => t.parentElement === parent) && !parent.closest('.nb, .nw, .nbx')) {
           const span = document.createElement('span'); span.className = 'nbx';
           run[0].before(span); run.forEach((t) => span.append(t));
+          // a fixed term of this page whose second half starts the next phrase (出席・学習時間・課題の｜提出を):
+          // keep the term in one piece, together with the particle and punctuation after it
+          const next = mark && mark.tagName === 'WBR' && mark.previousSibling === span ? mark.nextSibling : null;
+          const term = next && next.nodeType === 3 && TERMS.find((w) => [...w].some((_, k) => k > 0 && str.endsWith(w.slice(0, k)) && next.nodeValue.startsWith(w.slice(k))));
+          if (term) {
+            const k = [...term].findIndex((_, i) => i > 0 && str.endsWith(term.slice(0, i)) && next.nodeValue.startsWith(term.slice(i)));
+            const m = term.slice(k) + (/^[をにがはでと]?[、。，．）」]*/.exec(next.nodeValue.slice(term.length - k)) || [''])[0];
+            span.append(m); next.nodeValue = next.nodeValue.slice(m.length); mark.remove();
+            if (next.nodeValue) span.after(document.createElement('wbr'));
+          }
         }
         run = [];
       };
-      scan(block).forEach((it) => { if (it.mark) flush(); else run.push(it.text); });
-      flush();
+      scan(block).forEach((it) => { if (it.mark) flush(it.mark); else run.push(it.text); });
+      flush(null);
     };
     const fixBlock = (block) => { prune(block); groupBrackets(block); hoist(block); glueLast(block); guardDots(block); };
     $$('.bdx').forEach(fixBlock);
@@ -322,6 +333,13 @@
   const requestScroll = () => {
     if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(runScroll); }
   };
+  // height of the fixed header: effects that follow the reading position keep below it, even while it is shown
+  const siteHeader = $('.site-header');
+  let headerHeight = siteHeader ? siteHeader.offsetHeight : 0;
+  const headerH = () => headerHeight;
+  // where the screen below the header starts right now (the header slides away while reading down)
+  const headerBottom = () => (siteHeader ? Math.max(0, siteHeader.getBoundingClientRect().bottom) : 0);
+  onResizeFns.push(() => { headerHeight = siteHeader ? siteHeader.offsetHeight : 0; });
   const runResize = () => { for (const fn of onResizeFns) fn(); requestScroll(); };
   let resizeTimer;
   addEventListener('scroll', requestScroll, { passive: true });
@@ -446,11 +464,13 @@
   });
   groups.forEach((list) => list.forEach((el, i) => el.style.setProperty('--d', `${Math.min(i, 6) * 0.09}s`)));
   if ('IntersectionObserver' in window) {
+    // shown once a fair part of it is on screen: 60px of a tall block, or 40% of a short heading
+    // (a fixed margin at the bottom of the screen left short headings blank at the edge of low landscape screens)
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+        if (e.isIntersecting && e.intersectionRect.height >= Math.min(60, e.boundingClientRect.height * 0.4)) { e.target.classList.add('is-in'); io.unobserve(e.target); }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    }, { threshold: [0, 0.05, 0.1, 0.15, 0.25, 0.4, 0.6] });
     reveals.forEach((el) => io.observe(el));
   } else {
     reveals.forEach((el) => el.classList.add('is-in'));
@@ -663,18 +683,33 @@
         ink.style.transform = `translateX(${active.offsetLeft}px)`;
       }
     };
+    // the two cards of a case slide in when it is shown; a card that is below the screen at that moment
+    // (phones and tablets stack them) slides in when it comes into view, instead of off screen
+    const cards = panels.map((p) => $$('.case-before, .case-after', p));
+    const enterIo = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting || e.intersectionRect.height < Math.min(60, e.boundingClientRect.height * 0.4)) return;
+        e.target.classList.remove('is-pending'); e.target.classList.add('is-entering'); enterIo.unobserve(e.target);
+      });
+    }, { threshold: [0, 0.05, 0.1, 0.15, 0.25, 0.4] }) : null;
+    const enter = (list) => list.forEach((c) => {
+      c.classList.remove('is-entering', 'is-pending'); if (enterIo) enterIo.unobserve(c);
+      if (!motionOn()) return;
+      const r = c.getBoundingClientRect(); const seen = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, headerH()));
+      void c.offsetWidth;
+      if (!enterIo || seen >= Math.min(60, r.height * 0.4)) c.classList.add('is-entering');
+      else { c.classList.add('is-pending'); enterIo.observe(c); }
+    });
     const select = (tab, focus) => {
       tabs.forEach((t, i) => {
         const on = t === tab;
         t.setAttribute('aria-selected', String(on));
         t.tabIndex = on ? 0 : -1;
         panels[i].hidden = !on;
-        if (on && motionOn()) {
-          panels[i].classList.remove('is-entering'); void panels[i].offsetWidth; panels[i].classList.add('is-entering');
-        }
       });
       if (focus) tab.focus({ preventScroll: true });
       moveInk();
+      enter(cards[tabs.indexOf(tab)]);
     };
     tabs.forEach((t, i) => {
       t.addEventListener('click', () => select(t, false));
@@ -692,8 +727,8 @@
     $$('[data-case-go]', tabsRoot).forEach((btn) => btn.addEventListener('click', () => {
       const tab = tabs[parseInt(btn.dataset.caseGo, 10) - 1];
       if (!tab) return;
-      select(tab, true);
       (hint || tab).scrollIntoView({ behavior: motionOn() ? 'smooth' : 'auto', block: 'start' });
+      select(tab, true);
     }));
     onResizeFns.push(moveInk);
     moveInk();
@@ -757,10 +792,28 @@
       if (queued !== null) { const q = queued; queued = null; if (q !== active) wipeTo(q); }
     };
 
+    // Room before the first chapter and after the last one, so the sticky screen is fully in view for the whole
+    // time the chapters are read: it has come up completely by the time the first chapter reaches the middle of the
+    // screen, and the end of the column does not push it off the top while the last lines are still being read.
+    const sticky = $('.story__sticky', story);
+    const device = $('.device', story);
+    const fitRoom = () => {
+      if (!mqWideLayout.matches || !sticky.offsetHeight) { story.style.removeProperty('--story-tail'); story.style.removeProperty('--story-head'); return; }
+      const hb = headerH(); const band = innerHeight - hb;
+      story.style.setProperty('--story-head', `${Math.max(0, Math.round(device.offsetHeight + 8 - (innerHeight - (hb + band * 0.55))))}px`);
+      // the screen may rise to the header; it does so only once the last chapter has moved up past the top quarter
+      story.style.setProperty('--story-tail', `${Math.max(0, Math.round(sticky.offsetHeight - band * 0.25 + 6))}px`);
+    };
+    onResizeFns.push(fitRoom);
+    fitRoom();
+
     onScrollFns.push((y, vh) => {
       if (!mqWideLayout.matches) return;
+      // the screen shows the chapter whose start has reached the reading line (a little below the middle of the
+      // screen under the header)
+      const line = headerH() + (vh - headerH()) * 0.55;
       let idx = 0;
-      chapters.forEach((c, i) => { if (c.getBoundingClientRect().top < vh * 0.6) idx = i; });
+      chapters.forEach((c, i) => { if (c.getBoundingClientRect().top < line) idx = i; });
       if (idx !== active || busy) wipeTo(idx);
       else queued = null;
     });
@@ -916,15 +969,14 @@
     const peek = $('[data-board-peek]');
     const NAMES = { research: 'A 調べる・整理する', make: 'B つくる・整える', check: 'C 確かめる・仕上げる' };
     const state = { research: false, make: false, check: false };
-    let timers = [];
-    let autoPlayed = false;
-    const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+    let holdStamp = false; // a build keeps the stamp back until the checklist has played and the stamp can be seen
     const render = (announce = true) => {
       btns.forEach((b) => b.setAttribute('aria-pressed', String(state[b.dataset.role])));
       Object.keys(state).forEach((k) => board.classList.toggle(`has-${k}`, state[k]));
       const on = Object.keys(state).filter((k) => state[k]);
       board.classList.toggle('is-empty', on.length === 0);
-      board.classList.toggle('is-complete', on.length === 3);
+      // the 「完成！」 stamp: straight after the third role when chosen by hand; in a build, once it can be seen
+      board.classList.toggle('is-complete', on.length === 3 && !holdStamp);
       meter.style.transform = `scaleX(${on.length / 3})`;
       if (meterMini) meterMini.style.transform = `scaleX(${on.length / 3})`;
       if (peek) { peek.textContent = on.length === 3 ? '3つの役割がそろいました。下の制作ボードで完成形を確認できます' : on.length ? `制作ボードに反映中（${on.length}/3）` : '役割を選ぶと、下の制作ボードが組み上がります'; phraseBreak(peek); }
@@ -935,34 +987,112 @@
       status.textContent = msg;
       phraseBreak(status);
     };
+    /* Building the board part by part. Each part is added only while it can be seen, and a beat after the
+       previous one, so nothing assembles off screen (on a jump through the page, a quick flick, or below the buttons
+       on phones). It pauses while the board is out of view and carries on when it comes back. */
+    const ORDER = ['research', 'make', 'check'];
+    // a part every 0.6s on its own (quick enough to finish while the board is in view at a reading pace);
+    // slower, every 1.2s, when the visitor asks to watch it with 「順番に見る」
+    const STEP_MS = 600; const STEP_MS_PLAY = 1200;
+    const partEls = { research: $('.board__memo', board), make: $('.board__post', board), check: $('.board__check', board) };
+    let build = null; // { announce, gap, last } while a build is running
+    let autoState = 'waiting'; // first visit: waiting → done (taken over by the visitor, or built once)
+    let ticker = 0; let calmTimer = 0; let boardInView = false; let lastScroll = 0; let lastFast = 0; let tickY = scrollY; const trail = [];
+    // when the page last moved, and when it last moved fast (over 1px per ms: a link jump, a flick, a big step) –
+    // frame by frame, and across the last 0.15s so the slow start and end of such a move count too
+    onScrollFns.push((y) => {
+      const now = performance.now();
+      const prev = trail[trail.length - 1];
+      trail.push([now, y]); while (trail.length > 2 && now - trail[1][0] > 150) trail.shift();
+      const [t0, y0] = trail[0];
+      const step = prev ? Math.abs(y - prev[1]) / Math.min(50, Math.max(8, now - prev[0])) : 0;
+      if (step > 1 || Math.abs(y - y0) / Math.max(50, Math.min(150, now - t0)) > 1) lastFast = now;
+      lastScroll = now;
+      // look again as soon as a move has calmed down, rather than at the next round
+      if (ticker) { clearTimeout(calmTimer); calmTimer = setTimeout(tick, 160); }
+    });
+    const shownShare = (el) => {
+      // share of the element inside the screen below the header; parts taller than that count by the screen they fill
+      const r = el.getBoundingClientRect(); const hb = headerBottom();
+      const h = Math.min(r.height, innerHeight - hb);
+      return h > 0 ? Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, hb)) / h : 0;
+    };
+    const stopTicker = () => { clearInterval(ticker); ticker = 0; };
+    const tick = () => {
+      const now = performance.now();
+      // nothing starts or is added while the page is moving fast (also caught here, between frames)
+      if (Math.abs(scrollY - tickY) > 40) lastFast = now;
+      tickY = scrollY;
+      if (now - lastFast < 150) return;
+      if (!build) {
+        if (autoState !== 'waiting') { stopTicker(); return; }
+        // the first time the board is in view while the page is calm (not flying past), show the idea once;
+        // the first part comes in this same step
+        if (shownShare(board) < 0.55) return;
+        autoState = 'done';
+        if (ORDER.some((k) => state[k])) return;
+        startBuild(false);
+        return;
+      }
+      const next = ORDER.find((k) => !state[k]);
+      // a part already in the upper half of the screen will soon be scrolled away: do not keep it waiting
+      const leaving = (el) => el.getBoundingClientRect().top < headerBottom() + (innerHeight - headerBottom()) * 0.45;
+      if (!next) {
+        // last, the stamp: once the first checks have ticked (0.6s) and the page is still for a moment (the visitor
+        // is looking), or straight away if the checklist is about to be scrolled away; always while it is in view
+        const ready = leaving(partEls.check) ? now - build.last >= 200 : now - build.last >= 600 && now - lastScroll >= 150;
+        if (ready && shownShare(partEls.check) >= 0.8) { holdStamp = false; board.style.setProperty('--stamp-delay', '.1s'); render(build.announce); build = null; stopTicker(); }
+        return;
+      }
+      const gap = leaving(partEls[next]) ? Math.min(200, build.gap) : build.gap;
+      if (now - build.last >= gap && shownShare(partEls[next]) >= 0.7) { state[next] = true; build.last = now; render(build.announce); }
+    };
+    const startTicker = () => { if (!ticker && boardInView) ticker = setInterval(tick, 50); };
+    const finishAll = (announce) => { build = null; holdStamp = false; ORDER.forEach((k) => { state[k] = true; }); render(announce); };
+    const startBuild = (announce) => {
+      ORDER.forEach((k) => { state[k] = false; });
+      holdStamp = true; board.style.removeProperty('--stamp-delay');
+      render(announce);
+      if (!motionOn()) { finishAll(announce); return; }
+      const gap = announce ? STEP_MS_PLAY : STEP_MS;
+      // the first part comes straight away (the board has just been seen), the next ones a beat apart
+      build = { announce, gap, last: performance.now() - gap };
+      startTicker();
+      tick();
+    };
+    const takeOver = () => { autoState = 'done'; build = null; holdStamp = false; board.style.removeProperty('--stamp-delay'); };
     btns.forEach((b) => b.addEventListener('click', () => {
-      clearTimers();
+      takeOver();
       state[b.dataset.role] = !state[b.dataset.role];
       render();
     }));
-    const play = (announce) => {
-      clearTimers();
-      Object.keys(state).forEach((k) => { state[k] = false; });
-      render(announce);
-      const fast = !motionOn();
-      ['research', 'make', 'check'].forEach((k, i) => {
-        timers.push(setTimeout(() => { state[k] = true; render(announce); }, fast ? 0 : 500 + i * 1500));
-      });
-    };
-    $('[data-roles-play]').addEventListener('click', () => play(true));
+    $('[data-roles-play]').addEventListener('click', () => {
+      takeOver();
+      // bring the whole board into view first (phones and tablets: it is below the buttons; a board taller than the
+      // screen is lined up with its top, and the rest is built as it comes into view)
+      const r = board.getBoundingClientRect(); const hb = headerH(); const band = innerHeight - hb;
+      let dy = 0;
+      if (r.height > band - 24 || r.top < hb + 8) dy = r.top - (hb + 12);
+      else if (r.bottom > innerHeight - 8) dy = r.bottom - (innerHeight - 12);
+      if (Math.abs(dy) > 4) window.scrollTo({ top: scrollY + dy, behavior: motionOn() ? 'smooth' : 'auto' });
+      startBuild(true);
+    });
     $('[data-roles-reset]').addEventListener('click', () => {
-      clearTimers();
-      Object.keys(state).forEach((k) => { state[k] = false; });
+      takeOver();
+      ORDER.forEach((k) => { state[k] = false; });
       render();
     });
+    // with motion off the board starts complete, so its content is there to read without pressing anything
+    if (!motionOn()) { ORDER.forEach((k) => { state[k] = true; }); autoState = 'done'; }
     render(false);
-    // show the idea once, the first time the board comes into view
-    new IntersectionObserver(([e], obs) => {
-      if (e.isIntersecting && !autoPlayed && motionOn()) {
-        autoPlayed = true; obs.disconnect();
-        if (!Object.values(state).some(Boolean)) play(false);
-      }
-    }, { threshold: 0.25 }).observe(board); // tall phone layouts never show 45% of the board at once
+    document.addEventListener('motionchange', () => {
+      if (!motionOn() && (build || autoState === 'waiting')) { autoState = 'done'; finishAll(false); }
+    });
+    new IntersectionObserver((entries) => {
+      boardInView = entries[entries.length - 1].isIntersecting;
+      if (boardInView && (build || autoState === 'waiting')) startTicker();
+      else if (!boardInView) stopTicker();
+    }).observe(board);
   }
 
   /* =========================================================
@@ -1008,7 +1138,8 @@
       const [ux, uy, dO] = dir(O); const [vx, vy, dK] = dir(K);
       const n = horizontal ? [0, 1] : [1, 0]; // outgoing arcs below (wide) / right (narrow)
       // labels sit at the middle of each arc (≈ 0.75 r from the centre line); keep the pair inside the box
-      const r = horizontal ? Math.min(210, Math.max(dO, dK) * 0.52) : Math.min(box.width * 0.33, 150);
+      // (wide: the arcs bow 0.75 r above and below the row, so keep them inside the box as well)
+      const r = horizontal ? Math.min(210, Math.max(dO, dK) * 0.52, (box.height / 2 - 22) / 0.75) : Math.min(box.width * 0.33, 150);
       const at = (p, d, s, t) => [p[0] + d[0] * s + n[0] * t, p[1] + d[1] * s + n[1] * t];
       const f = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
       const u = [ux, uy]; const v = [vx, vy];
@@ -1083,22 +1214,39 @@
   const counters = $$('[data-count]');
   if (counters.length) {
     const ease = (t) => 1 - Math.pow(2, -10 * t);
-    const run = (el) => {
-      const target = parseInt(el.dataset.count, 10);
-      if (!motionOn()) { el.textContent = target; return; }
+    const box = counters[0].parentElement;
+    const final = () => counters.forEach((el) => { el.textContent = el.dataset.count; });
+    let state = 'waiting'; let seenSince = 0; let poll = 0; let raf = 0;
+    const inView = () => {
+      const r = box.getBoundingClientRect(); const hb = headerBottom();
+      return r.height > 0 && Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, hb)) / r.height >= 0.9;
+    };
+    const count = () => {
+      state = 'counting';
       const start = performance.now(); const dur = 1400;
       const step = (now) => {
+        // left the screen before the end: show the final value now, and count again the next time it is seen
+        if (!inView()) { raf = 0; final(); state = 'waiting'; seenSince = 0; return; }
         const t = clamp((now - start) / dur, 0, 1);
-        el.textContent = Math.round(target * ease(t));
-        if (t < 1) requestAnimationFrame(step);
+        counters.forEach((el) => { el.textContent = Math.round(parseInt(el.dataset.count, 10) * ease(t)); });
+        if (t < 1) raf = requestAnimationFrame(step); else { raf = 0; state = 'done'; stopPoll(); }
       };
-      el.textContent = '0';
-      requestAnimationFrame(step);
+      counters.forEach((el) => { el.textContent = '0'; });
+      raf = requestAnimationFrame(step);
     };
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } });
-    }, { threshold: 0.6 });
-    counters.forEach((el) => io.observe(el));
+    const stopPoll = () => { clearInterval(poll); poll = 0; };
+    // count up once the numbers have been fully in view for a moment, not while the page jumps or flicks past them
+    const check = () => {
+      if (state !== 'waiting') return;
+      if (!motionOn()) { final(); state = 'done'; stopPoll(); return; }
+      if (inView()) { if (!seenSince) seenSince = performance.now(); else if (performance.now() - seenSince >= 350) count(); }
+      else seenSince = 0;
+    };
+    new IntersectionObserver((entries) => {
+      const e = entries[entries.length - 1];
+      if (e.isIntersecting && state !== 'done') { if (!poll) poll = setInterval(check, 80); }
+      else if (!e.isIntersecting) { stopPoll(); seenSince = 0; }
+    }).observe(box);
   }
 
   /* =========================================================
@@ -1108,31 +1256,50 @@
   if (pipe) {
     const steps = $$('.pstep', pipe);
     const rail = $('.pipeline__rail', pipe);
-    let pTop = 0; let pH = 0; let thresholds = [];
+    const icons = steps.map((s) => $('.pstep__icon', s));
+    let mode = 'row'; let railTop = 0; let railH = 0; let iconY = []; let thresholds = [];
     const measure = () => {
-      const r = pipe.getBoundingClientRect();
-      pTop = r.top + scrollY; pH = r.height;
       const rr = rail.getBoundingClientRect();
-      const vertical = rr.height > rr.width;
-      thresholds = steps.map((s) => {
-        const ir = $('.pstep__icon', s).getBoundingClientRect();
-        const pos = vertical ? (ir.top + ir.height / 2 - rr.top) / rr.height : (ir.left + ir.width / 2 - rr.left) / rr.width;
-        return clamp(pos, 0, 1) - 0.02;
+      mode = !rr.width && !rr.height ? 'grid' : rr.height > rr.width ? 'column' : 'row';
+      railTop = rr.top + scrollY; railH = rr.height;
+      iconY = icons.map((ic) => { const r = ic.getBoundingClientRect(); return r.top + r.height / 2 + scrollY; });
+      thresholds = icons.map((ic) => {
+        const ir = ic.getBoundingClientRect();
+        const pos = mode === 'column' ? (ir.top + ir.height / 2 - rr.top) / rr.height : (ir.left + ir.width / 2 - rr.left) / rr.width;
+        // the first step lights up when the document sets off (on screen), not from the start
+        return Math.max(0.002, clamp(pos, 0, 1) - 0.02);
       });
     };
     onResizeFns.push(measure);
     measure();
     onScrollFns.push((y, vh) => {
-      const start = pTop - vh * 0.82;
-      const end = pTop + pH - vh * 0.42;
-      const p = motionOn() ? clamp((y - start) / (end - start), 0, 1) : 1;
+      if (!motionOn()) { pipe.style.setProperty('--p', '1'); steps.forEach((s) => s.classList.add('is-active')); return; }
+      const hb = headerH(); const band = vh - hb;
+      if (mode === 'grid') {
+        // two by two (no rail): each step lights up as its icon passes the reading line
+        steps.forEach((s, i) => s.classList.toggle('is-active', iconY[i] - y <= hb + band * 0.55));
+        return;
+      }
+      let p;
+      if (mode === 'column') {
+        // phones: the document sits on the reading line while it travels down the rail
+        p = clamp((y + hb + band * 0.5 - railTop) / railH, 0, 1);
+      } else {
+        // a row across the screen: the document crosses while the rail moves from low on the screen to the upper part,
+        // so the rail (and the document on it) is in view for the whole trip
+        const r0 = railTop - (hb + band * 0.85); const r1 = railTop - (hb + band * 0.2);
+        p = clamp((y - r0) / (r1 - r0), 0, 1);
+      }
       pipe.style.setProperty('--p', p.toFixed(4));
       steps.forEach((s, i) => s.classList.toggle('is-active', p >= thresholds[i]));
     });
   }
 
   /* =========================================================
-     STAGES PATH (start)
+     STAGES (start): the character follows the reading line
+     A path runs through the four pins. While the section is read, the character sits on the path exactly at the
+     reading line (half way down the screen), so it is always on screen while it moves; pins and cards light up as
+     it passes them. Before the first pin it waits there, after the last pin it stays at the end.
      ========================================================= */
   const stagesEl = $('[data-stages]');
   if (stagesEl) {
@@ -1140,48 +1307,65 @@
     const base = $('.stages__path-base', stagesEl);
     const fill = $('.stages__path-fill', stagesEl);
     const avatar = $('.stages__avatar', stagesEl);
+    const list = $('.stages__list', stagesEl);
     const stages = $$('.stage', stagesEl);
     const pins = stages.map((s) => $('.stage__pin', s));
-    let len = 0; let sTop = 0; let sH = 0; let marks = [];
+    const READ = 0.5;
+    let len = 0; let sTop = 0; let marks = []; let table = [];
+    const zigzag = () => getComputedStyle(list).display === 'flex';
+    // zigzag (wide screens): each card rises next to the previous one; keep a clear gap between cards in the same column
+    const setOverlap = () => {
+      if (!zigzag()) { stagesEl.style.removeProperty('--stage-overlap'); return; }
+      const hs = stages.map((s) => s.offsetHeight);
+      stagesEl.style.setProperty('--stage-overlap', `${Math.round(Math.max(60, Math.min(150, Math.min(...hs) * 0.42)))}px`);
+    };
     const measure = () => {
+      setOverlap();
       const box = stagesEl.getBoundingClientRect();
       const pts = pins.map((p) => {
-        // ignore the reveal offset (translate) so the path matches the settled layout
+        // take off the card's current slide-in offset (also part way through it) so the path matches the settled layout
         const r = p.getBoundingClientRect();
-        const st = p.parentElement;
-        const tr = getComputedStyle(st).translate;
+        const tr = getComputedStyle(p.parentElement).translate;
         const dy = tr && tr !== 'none' ? parseFloat(tr.split(' ')[1] || 0) : 0;
-        return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top - (st.classList.contains('is-in') ? 0 : dy)];
+        return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top - dy];
       });
-      const vertical = Math.abs(pts[pts.length - 1][0] - pts[0][0]) < 40;
+      const sway = zigzag() ? 22 : 0;
       let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
       const segs = [];
       for (let i = 1; i < pts.length; i++) {
-        const [x0, y0] = pts[i - 1]; const [x1, y1] = pts[i];
-        let seg;
-        if (vertical) { const my = (y0 + y1) / 2; seg = ` C ${x0} ${my}, ${x1} ${my}, ${x1} ${y1}`; }
-        else { const top = Math.min(y0, y1) - 70; seg = ` C ${x0 + (x1 - x0) * 0.3} ${top}, ${x0 + (x1 - x0) * 0.7} ${top}, ${x1} ${y1}`; } // arc above the cards
-        segs.push(seg);
+        const [x0, y0] = pts[i - 1]; const [x1, y1] = pts[i]; const dy = y1 - y0;
+        const s = i % 2 ? sway : -sway; // a gentle S-curve between the pins
+        segs.push(` C ${(x0 + s).toFixed(1)} ${(y0 + dy * 0.35).toFixed(1)}, ${(x1 + s).toFixed(1)} ${(y1 - dy * 0.35).toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`);
       }
       svg.setAttribute('viewBox', `0 0 ${box.width.toFixed(0)} ${box.height.toFixed(0)}`);
-      // cumulative lengths so each pin lights up exactly when the avatar arrives
+      // cumulative lengths so each pin lights up exactly when the character arrives
       marks = [0];
       let acc = d;
       segs.forEach((seg) => { acc += seg; base.setAttribute('d', acc); marks.push(base.getTotalLength()); });
       fill.setAttribute('d', acc);
       len = fill.getTotalLength();
       fill.style.strokeDasharray = `${len} ${len}`;
-      sTop = box.top + scrollY; sH = box.height;
+      // length ↔ position table (the path only ever goes down, so the height maps to one point)
+      table = [];
+      for (let i = 0; i <= 240; i++) { const l = (len * i) / 240; const pt = fill.getPointAtLength(l); table.push([l, pt.x, pt.y]); }
+      sTop = box.top + scrollY;
     };
     const update = (y, vh) => {
       if (!len) return;
-      const start = sTop - vh * 0.55;
-      const end = sTop + sH - vh * 0.7;
-      const p = motionOn() ? clamp((y - start) / (end - start), 0, 1) : 1;
-      const at = len * p;
+      const hb = headerH();
+      const local = y + hb + (vh - hb) * READ - sTop; // the reading line, in the block's own coordinates
+      let k = 0; let f = 0;
+      if (!motionOn() || local >= table[table.length - 1][2]) { k = table.length - 2; f = 1; }
+      else if (local > table[0][2]) {
+        let lo = 0; let hi = table.length - 1;
+        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (table[mid][2] <= local) lo = mid; else hi = mid; }
+        k = lo; f = (local - table[lo][2]) / Math.max(0.001, table[hi][2] - table[lo][2]);
+      }
+      const a = table[k]; const b = table[k + 1];
+      const at = a[0] + (b[0] - a[0]) * f;
+      const x = a[1] + (b[1] - a[1]) * f; const yy = a[2] + (b[2] - a[2]) * f;
       fill.style.strokeDashoffset = (len - at).toFixed(1);
-      const pt = fill.getPointAtLength(at);
-      avatar.style.transform = `translate(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px) translate(-50%, -50%)`;
+      avatar.style.transform = `translate(${x.toFixed(1)}px, ${yy.toFixed(1)}px) translate(-50%, -50%)`;
       stages.forEach((s, i) => s.classList.toggle('is-reached', at >= marks[i] - 2));
     };
     onResizeFns.push(measure);
