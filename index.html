@@ -543,42 +543,55 @@
       </div>
       <div class="container">
         <header class="sec-head sec-head--center" data-reveal>
-          <p class="kicker"><span class="kicker__en">SUBMIT</span><span class="kicker__ja">提出の瞬間と、残る記録</span></p>
-          <h2 class="sec-title" id="sent-title">「できた」が、<br><em>ちゃんと届く。</em></h2>
-          <p class="sec-lead">アプリから出すと、緑の「届きました」。<br>できたチェックがそろった取り組みが、記録に残ります。</p>
+          <p class="kicker"><span class="kicker__en">SUBMIT</span><span class="kicker__ja">出したあとの流れ</span></p>
+          <h2 class="sec-title" id="sent-title">出したら、<br><em>ちゃんと返ってくる。</em></h2>
+          <p class="sec-lead">出した取り組みは、スクールの担当が確かめて、課題ごとのチャットで返事をします。<br>直して出し直せるから、利用者さんは続けやすく、職員さんも安心です。</p>
         </header>
 
+        <!-- 出したあとの流れ：1 出す → 2 担当が確かめる → 3 返事が届く → 4 出し直す・記録に残る。右はアプリの課題チャットの見本 -->
         <div class="sent-stage" data-sent>
+          <ol class="flowline">
+            <li class="flowline__step" data-sent-step><span class="flowline__no" aria-hidden="true">1</span><div class="flowline__body"><h3 class="flowline__title">出す</h3><p>アプリから出すと「届きました」。出せたことが、その場で分かります。</p></div></li>
+            <li class="flowline__step" data-sent-step><span class="flowline__no" aria-hidden="true">2</span><div class="flowline__body"><h3 class="flowline__title">担当が確かめる</h3><p>スクールの担当が、出した物の中身を確かめます。</p></div></li>
+            <li class="flowline__step" data-sent-step><span class="flowline__no" aria-hidden="true">3</span><div class="flowline__body"><h3 class="flowline__title">返事が届く</h3><p>課題ごとのチャットに、よかった所と直すとよい所が届きます。</p></div></li>
+            <li class="flowline__step" data-sent-step><span class="flowline__no" aria-hidden="true">4</span><div class="flowline__body"><h3 class="flowline__title">出し直す・記録に残る</h3><p>直して出し直せます。OKになった取り組みは、記録に残ります（本番の案件は、確認のあと納品へ）。</p></div></li>
+          </ol>
           <figure class="sent-phone">
             <div class="phone" aria-hidden="true">
-              <div class="phone__bar"><span class="phone__back"><svg class="icon"><use href="#i-left"/></svg></span><img src="assets/img/logo.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><b>エスピクトスクール</b></div>
+              <div class="phone__bar"><span class="phone__back"><svg class="icon"><use href="#i-left"/></svg></span><img src="assets/img/logo.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><b>課題のチャット</b></div>
               <div class="phone__task">
                 <p class="phone__chips"><span>本番</span><span>Web制作</span></p>
                 <p class="phone__title">お店のお知らせ記事を1本書く（見本）</p>
               </div>
-              <div class="phone__checks">
-                <p class="phone__checks-title"><svg class="icon"><use href="#i-clip"/></svg><span>出す前に確かめよう<span class="nw">（できたチェック 3つ）</span></span></p>
-                <ol>
-                  <li class="phone__check" data-sent-step><i></i>見出しが3つある</li>
-                  <li class="phone__check" data-sent-step><i></i>写真が1枚入っている</li>
-                  <li class="phone__check" data-sent-step><i></i>誤字がない</li>
-                </ol>
-              </div>
-              <div class="phone__msg">
-                <p class="phone__who"><span class="phone__avatar"><svg class="icon"><use href="#i-person"/></svg></span><b>あなた</b><small>○/○ 11:18</small></p>
-                <p class="phone__url">作ったページ：<span>https://example.com/mihon</span></p>
-                <p class="phone__sent" data-sent-step><svg class="icon"><use href="#i-check-circle"/></svg><b>届きました</b><span>これで提出できています</span></p>
+              <div class="chat">
+                <div class="chat__msg chat__msg--me" data-sent-step>
+                  <p class="chat__who">あなた</p>
+                  <div class="chat__bubble"><p>作ったページ：<span class="chat__url">https://example.com/mihon</span></p><p class="chat__meta"><svg class="icon"><use href="#i-clip"/></svg><span>できたチェック 3つ</span></p></div>
+                  <p class="chat__status"><svg class="icon"><use href="#i-check"/></svg><span>届きました</span></p>
+                </div>
+                <div class="chat__msg chat__msg--staff" data-sent-step>
+                  <p class="chat__who">スクールの担当<span class="chat__tag">イメージ</span></p>
+                  <div class="chat__bubble">
+                    <p>確かめました。</p>
+                    <p class="chat__point chat__point--good"><b>よかった所</b><span>見出しが分かりやすく、写真も内容に合っています。</span></p>
+                    <p class="chat__point chat__point--fix"><b>直すとよい所</b><span>写真の下に、ひとことの説明を足すと、もっと伝わります。</span></p>
+                  </div>
+                </div>
+                <div class="chat__msg chat__msg--me" data-sent-step>
+                  <p class="chat__who">あなた</p>
+                  <div class="chat__bubble"><p>説明を足して、出し直しました。</p></div>
+                  <p class="chat__status"><svg class="icon"><use href="#i-check"/></svg><span>届きました</span></p>
+                </div>
+                <div class="chat__msg chat__msg--staff" data-sent-step>
+                  <p class="chat__who">スクールの担当<span class="chat__tag">イメージ</span></p>
+                  <div class="chat__bubble"><p>OKです。おつかれさまでした！</p></div>
+                  <p class="chat__done"><svg class="icon"><use href="#i-check-circle"/></svg><span>OK・記録に残りました</span></p>
+                </div>
               </div>
             </div>
-            <p class="sr-only">提出画面の見本。できたチェック3つ（見出しが3つある・写真が1枚入っている・誤字がない）がすべてそろい、緑の「届きました　これで提出できています」が表示されます。</p>
-            <figcaption>アプリの画面と通知を再現した見本です（架空のデータ）</figcaption>
+            <p class="sr-only">課題ごとのチャットの見本。利用者が作ったページを出すと「届きました」と表示されます。スクールの担当が確かめて、よかった所（見出しが分かりやすく、写真も内容に合っている）と直すとよい所（写真の下に、ひとことの説明を足す）を返事します。利用者が直して出し直すと、担当がOKを出し、取り組みが記録に残ります。返事の文はイメージです。</p>
+            <figcaption>アプリの課題チャットを再現した見本です（返事の文はイメージ・架空のデータ）</figcaption>
           </figure>
-          <ul class="sent-toasts" aria-label="「届きました」の通知の見本（架空のデータ）">
-            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>アイキャッチ画像を作る</span></span></li>
-            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>動画に字幕を入れる</span></span></li>
-            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>アンケート結果を表にまとめる</span></span></li>
-            <li class="toast" data-sent-step><span class="toast__icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span><span class="toast__text"><b>届きました</b><span>商品の紹介文を書く</span></span></li>
-          </ul>
         </div>
 
         <!-- 今月の数字。data/stats.json に数字が入っている項目だけ表示（README「今月の数字」） -->
@@ -594,7 +607,7 @@
 
         <div class="record" data-reveal>
           <div class="record__copy">
-            <p class="record__kicker"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>届いたあとも</p>
+            <p class="record__kicker"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg>OKになったら</p>
             <h3 class="record__title">取り組みが、<br><em>記録として残る。</em></h3>
             <p>いつ、何に取り組み、何を出し、誰が確かめたか。日々の取り組みを、あとから確かめられる形で残します。</p>
             <p class="note">記録は日々の振り返りの材料です。福祉サービスとしての支援・記録は事業所で行います。</p>

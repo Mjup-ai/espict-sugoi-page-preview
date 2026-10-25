@@ -78,15 +78,24 @@
     const script = (ch) => (KATA.test(ch) ? 'k' : KANJI.test(ch) ? 'c' : LATIN.test(ch) ? 'l' : '');
 
     // words of this page that never break inside (app terms and set phrases)
-    const KEEP = ['できたチェック', '少しずつ', '届きました', '課題の提出'];
+    const KEEP = ['できたチェック', '少しずつ', '届きました', '課題の提出', 'よかった所', '直すとよい所', 'スクールの担当'];
     const kanjiTail = (s) => (s.match(/[\u3400-\u9fff\u3005]+$/) || [''])[0].length;
     const kanjiHead = (s) => (s.match(/^[\u3400-\u9fff\u3005]+/) || [''])[0].length;
+    // the text on both sides of a break point, across the other break points (up to a line break): for terms that
+    // BudouX split into three or more pieces (直すと|よい|所)
+    const wide = (items, i, n = 14) => {
+      let before = ''; let after = '';
+      for (let k = i - 1; k >= 0 && before.length < n; k--) { if (items[k].mark) { if (items[k].mark.tagName === 'BR') break; continue; } before = items[k].text.nodeValue + before; }
+      for (let k = i + 1; k < items.length && after.length < n; k++) { if (items[k].mark) { if (items[k].mark.tagName === 'BR') break; continue; } after += items[k].text.nodeValue; }
+      return { before: visible(before), after: visible(after) };
+    };
     // 1) remove poor break points
     const prune = (block) => {
       const items = scan(block);
       items.forEach((it, i) => {
         if (!it.mark || it.mark.tagName !== 'WBR') return;
         const { before, after } = around(items, i);
+        const far = wide(items, i);
         const a = before.slice(-1); const b = after.slice(0, 1);
         const sa = script(a); const sb = script(b);
         const remove =
@@ -99,7 +108,7 @@
           (kanjiTail(before) && kanjiHead(after) && kanjiTail(before) + kanjiHead(after) <= 4) ||   // short kanji compounds: 質問|対応, 紹介|動画
           OPEN.test(a) ||                                            // right after an opening bracket
           CLOSE.test(after) ||                                       // right before closing punctuation or a slash
-          KEEP.some((w) => [...w].some((_, k) => k > 0 && before.endsWith(w.slice(0, k)) && after.startsWith(w.slice(k)))); // fixed terms
+          KEEP.some((w) => [...w].some((_, k) => k > 0 && far.before.endsWith(w.slice(0, k)) && far.after.startsWith(w.slice(k)))); // fixed terms
         if (remove) it.mark.remove();
       });
     };
@@ -786,49 +795,79 @@
     const dots = $$('.story__dots li', story);
     const titles = ['01 教材とライブ授業', '02 エスピクトAI「ぴくと」', '03 出席・取り組みの記録'];
     const captions = chapters.map((c) => $('.chapter__caption', c)?.textContent || '');
-    let active = 0; let busy = false; let queued = null;
+    let active = 0; let busy = false; let queued = null; let wiping = -1; let cutShort = null;
 
     // load stage images a little before they are needed
     new IntersectionObserver(([e], obs) => {
       if (e.isIntersecting) { stageImgs.forEach((img) => { img.loading = 'eager'; }); obs.disconnect(); }
     }, { rootMargin: '120% 0px' }).observe(story);
 
-    const wipeTo = async (next) => {
-      if (busy) { queued = next; return; }
-      if (next === active) return;
-      busy = true;
-      const img = stageImgs[next];
-      stageTitle.textContent = titles[next];
-      stageCaption.textContent = captions[next];
+    // the title, caption and dots of a scene
+    const label = (i) => {
+      stageTitle.textContent = titles[i];
+      stageCaption.textContent = captions[i];
       phraseBreak(stageCaption);
-      dots.forEach((d, i) => d.classList.toggle('is-active', i === next));
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+    };
+    const wipeTo = async (next) => {
+      // while a change is going on: if the reader has moved on to a further chapter (not back to the scene being left),
+      // that change ends at once and the next one follows straight away; otherwise it finishes first
+      if (busy) { queued = next; if (next !== wiping && next !== active && cutShort) cutShort(); return; }
+      if (next === active) return;
+      busy = true; wiping = next;
+      const img = stageImgs[next];
+      label(next);
+      let shown = true;
       if (motionOn()) {
         try { await img.decode(); } catch (e) { /* show anyway */ }
-        const cols = 10; const rows = 7; const step = queued !== null ? 0 : 14;
-        const grid = document.createElement('div');
-        grid.className = 'wipe';
-        grid.style.setProperty('--cols', cols); grid.style.setProperty('--rows', rows);
-        const src = img.currentSrc || img.src;
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const cell = document.createElement('i');
-            cell.style.backgroundImage = `url("${src}")`;
-            cell.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
-            cell.style.backgroundPosition = `${(c / (cols - 1)) * 100}% ${(r / (rows - 1)) * 100}%`;
-            cell.style.animationDelay = `${(next > active ? c + r : (cols - 1 - c) + (rows - 1 - r)) * step}ms`;
-            grid.appendChild(cell);
+        if (queued === next) queued = null;
+        // the reader moved on to another chapter before this change could start: skip it (no in-between scene)
+        if (queued !== null) shown = false;
+        else {
+          const cols = 10; const rows = 7; const step = 14; const CELL_MS = 500;
+          const grid = document.createElement('div');
+          grid.className = 'wipe';
+          grid.style.setProperty('--cols', cols); grid.style.setProperty('--rows', rows);
+          const src = img.currentSrc || img.src;
+          let lastCell = null; let lastDelay = -1;
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const cell = document.createElement('i');
+              const delay = (next > active ? c + r : (cols - 1 - c) + (rows - 1 - r)) * step;
+              cell.style.backgroundImage = `url("${src}")`;
+              cell.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
+              cell.style.backgroundPosition = `${(c / (cols - 1)) * 100}% ${(r / (rows - 1)) * 100}%`;
+              cell.style.animationDelay = `${delay}ms`;
+              if (delay > lastDelay) { lastDelay = delay; lastCell = cell; }
+              grid.appendChild(cell);
+            }
           }
+          stage.appendChild(grid);
+          // until the last square has fully grown (with a fallback in case the animation never reports its end), or
+          // until the reader moves on to another chapter
+          await new Promise((res) => {
+            const done = () => { clearTimeout(timer); cutShort = null; res(); };
+            const timer = setTimeout(done, lastDelay + CELL_MS + 200);
+            lastCell.addEventListener('animationend', done, { once: true });
+            cutShort = done;
+          });
+          // the new picture goes in under the squares at once (no fade: its opacity is applied right here), and the
+          // squares leave in the same moment — so the previous picture never shows again once the wipe has covered it
+          stage.classList.add('is-swapping');
+          stageImgs.forEach((im, i) => im.classList.toggle('is-active', i === next));
+          stageImgs.forEach((im) => getComputedStyle(im).opacity);
+          grid.remove();
+          // the fade comes back for later changes; the opacities are already final, so nothing fades now
+          stage.classList.remove('is-swapping');
         }
-        stage.appendChild(grid);
-        await new Promise((res) => setTimeout(res, (cols + rows) * step + 380));
-        stageImgs.forEach((im, i) => im.classList.toggle('is-active', i === next));
-        grid.remove();
       } else {
         stageImgs.forEach((im, i) => im.classList.toggle('is-active', i === next));
       }
-      active = next;
-      busy = false;
-      if (queued !== null) { const q = queued; queued = null; if (q !== active) wipeTo(q); }
+      if (shown) active = next;
+      busy = false; wiping = -1;
+      const q = queued; queued = null;
+      if (q !== null && q !== active) wipeTo(q);
+      else if (!shown) label(active);
     };
 
     // Room before the first chapter and after the last one, so the sticky screen is fully in view for the whole
@@ -1319,24 +1358,17 @@
   }
 
   /* =========================================================
-     SENT: the checks, the 「届きました」 and the notifications pop as each one passes the reading line
-     (a little below the middle of the screen), so every one of them pops where it can be seen
+     SENT: what happens after a piece of work is sent — the four steps and the task's chat (sent, checked, replied,
+     sent again, OK). Each step and each message comes in as it passes the reading line (a little below the middle
+     of the screen), so every one of them appears where it can be seen
      ========================================================= */
   const sentEl = $('[data-sent]');
   if (sentEl) {
     const steps = $$('[data-sent-step]', sentEl);
-    const banner = $('.phone__sent', sentEl);
     let ys = [];
     // page position of an element, without the pop-in offset (offsetTop ignores transforms and translate)
     const docTop = (el) => { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y; };
-    const measure = () => {
-      // beside the phone (wide layouts): the notifications start at the 「届きました」, so they pop after it
-      const cs = getComputedStyle(sentEl);
-      const side = cs.display === 'block' || cs.gridTemplateColumns.split(' ').length > 1;
-      const bannerBottom = docTop(banner) - docTop(sentEl) + banner.offsetHeight;
-      sentEl.style.setProperty('--toasts-top', side ? `${Math.round(bannerBottom + (cs.display === 'block' ? 0 : 12))}px` : '0px');
-      ys = steps.map((s) => docTop(s) + s.offsetHeight / 2);
-    };
+    const measure = () => { ys = steps.map((s) => docTop(s) + s.offsetHeight / 2); };
     onResizeFns.push(measure);
     measure();
     onScrollFns.push((y, vh) => {
