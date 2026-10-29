@@ -1358,23 +1358,61 @@
   }
 
   /* =========================================================
-     SENT: what happens after a piece of work is sent — the four steps and the task's chat (sent, checked, replied,
-     sent again, OK). Each step and each message comes in as it passes the reading line (a little below the middle
-     of the screen), so every one of them appears where it can be seen
+     SENT: 納品までの流れ — the four steps (取り組む → 提出 → チェック → 納品), each with its part of the task chat
+     sample (beside it on wide screens, right below it on phones). A message comes in when it passes the reading
+     line (a little below the middle of the screen), so it is seen arriving. The step being read is the last one whose
+     card has reached that line or whose first message has come in; the line between the numbers fills up to it.
+     Its part of the chat is shown in full: once a part has begun to come in, the earlier messages step back a little
+     (on phones the next card comes before its part, so the part above stays in full until then); the later ones wait
+     faintly. With motion off, everything is shown from the start. Phones show a shorter chat: a message left out
+     there (not displayed) does not take part and simply follows its step.
      ========================================================= */
   const sentEl = $('[data-sent]');
   if (sentEl) {
+    const flow = $('.flowline', sentEl);
     const steps = $$('[data-sent-step]', sentEl);
-    let ys = [];
+    const msgs = $$('[data-sent-msg]', sentEl);
+    const nos = steps.map((s) => $('.flowline__no', s));
+    const stepOf = msgs.map((m) => steps.findIndex((s) => s.contains(m)));
+    let shown = []; let firstMsg = []; let boxes = []; let cards = []; let fills = []; let cur = '';
     // page position of an element, without the pop-in offset (offsetTop ignores transforms and translate)
     const docTop = (el) => { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y; };
-    const measure = () => { ys = steps.map((s) => docTop(s) + s.offsetHeight / 2); };
+    const mid = (el) => docTop(el) + el.offsetHeight / 2;
+    // the scroll position at which a message comes in: its middle on the reading line, but not before all of it is
+    // on the screen (a tall one on a short screen), or at the latest when its top reaches the header
+    const arrive = (b, vh) => {
+      const hb = headerH();
+      return Math.max(b.top + b.h / 2 - hb - (vh - hb) * 0.6, Math.min(b.top + b.h - vh + 8, b.top - hb - 8));
+    };
+    const measure = () => {
+      shown = msgs.map((m) => m.getClientRects().length > 0);
+      firstMsg = steps.map((s, k) => msgs.findIndex((m, i) => shown[i] && stepOf[i] === k));
+      boxes = msgs.map((m) => ({ top: docTop(m), h: m.offsetHeight }));
+      cards = steps.map((s) => mid($('.flowline__card', s)));
+      const top = docTop(flow); const c = nos.map((n) => mid(n) - top); const len = Math.max(1, c[c.length - 1] - c[0]);
+      flow.style.setProperty('--line-top', `${Math.round(c[0])}px`);
+      flow.style.setProperty('--line-h', `${Math.round(len)}px`);
+      fills = c.map((v) => (v - c[0]) / len);
+      cur = '';
+    };
     onResizeFns.push(measure);
     measure();
     onScrollFns.push((y, vh) => {
       const all = !motionOn();
       const line = y + headerH() + (vh - headerH()) * 0.6;
-      steps.forEach((s, i) => s.classList.toggle('is-on', all || ys[i] <= line));
+      const on = msgs.map((m, i) => all || (shown[i] && y >= arrive(boxes[i], vh)));
+      let now = -1; let latest = -1;
+      steps.forEach((s, i) => { if (all || cards[i] <= line || on[firstMsg[i]]) now = i; if (on[firstMsg[i]]) latest = i; });
+      msgs.forEach((m, i) => m.classList.toggle('is-on', shown[i] ? on[i] : all || stepOf[i] <= now));
+      const key = `${all}/${now}/${latest}`;
+      if (key === cur) return;
+      cur = key;
+      steps.forEach((s, i) => {
+        s.classList.toggle('is-on', i <= now);
+        s.classList.toggle('is-current', !all && i === now);
+        s.classList.toggle('is-latest', !all && i === latest);
+      });
+      flow.style.setProperty('--line-fill', String(all ? 1 : now < 0 ? 0 : fills[now]));
     });
   }
 
